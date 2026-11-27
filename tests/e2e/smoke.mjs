@@ -9,14 +9,17 @@
  *   MFH_SHOTS=1                     guarda capturas en tests/e2e/shots/
  *   MFH_SCHEME=light                prueba con el tema claro (por defecto, oscuro)
  */
-import { spawn } from 'node:child_process';
+import { createServer } from 'node:http';
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { extname, join, normalize } from 'node:path';
 import { chromium, devices } from 'playwright';
 
 const PORT = 4179;
-const APP_URL = `http://localhost:${PORT}/MFH/`;
+// La app debe funcionar en cualquier subcarpeta (el nombre del repositorio puede cambiar).
+const SUBPATH = '/una-carpeta-cualquiera/';
+const APP_URL = `http://localhost:${PORT}${SUBPATH}`;
 const shotsDir = new URL('./shots/', import.meta.url).pathname;
 const shots = process.env.MFH_SHOTS === '1';
 if (shots) mkdirSync(shotsDir, { recursive: true });
@@ -96,21 +99,37 @@ async function shot(page, name) {
   await page.screenshot({ path: join(shotsDir, `${String(step).padStart(2, '0')}-${name}.png`) });
 }
 
-const viteBin = new URL('../../node_modules/vite/bin/vite.js', import.meta.url).pathname;
-const server = spawn(process.execPath, [viteBin, 'preview', '--port', String(PORT), '--strictPort'], { stdio: 'ignore' });
-const stopServer = () => server.kill('SIGTERM');
-process.on('exit', stopServer);
+const DIST = new URL('../../dist/', import.meta.url).pathname;
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json',
+  '.webmanifest': 'application/manifest+json',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+};
+// Servidor estático mínimo que publica dist/ bajo SUBPATH, como hace GitHub Pages.
+const server = createServer(async (req, res) => {
+  const { pathname } = new URL(req.url, 'http://localhost');
+  if (!pathname.startsWith(SUBPATH)) return res.writeHead(404).end();
+  let rel = decodeURIComponent(pathname.slice(SUBPATH.length));
+  if (rel === '' || rel.endsWith('/')) rel += 'index.html';
+  const file = normalize(join(DIST, rel));
+  if (!file.startsWith(DIST)) return res.writeHead(403).end();
+  try {
+    const body = await readFile(file);
+    res.writeHead(200, { 'content-type': MIME[extname(file)] ?? 'application/octet-stream' }).end(body);
+  } catch {
+    res.writeHead(404).end();
+  }
+});
+const stopServer = () => server.close();
 
 async function waitForServer() {
-  for (let i = 0; i < 60; i++) {
-    try {
-      if ((await fetch(APP_URL)).ok) return;
-    } catch {
-      /* todavía arrancando */
-    }
-    await new Promise((r) => setTimeout(r, 250));
-  }
-  throw new Error('El servidor de vista previa no arrancó. ¿Has ejecutado "npm run build"?');
+  await new Promise((resolve) => server.listen(PORT, resolve));
+  if (!(await fetch(APP_URL)).ok) throw new Error('No hay nada en dist/. ¿Has ejecutado "npm run build"?');
 }
 
 const importPath = process.env.MFH_IMPORT ?? join(mkdtempSync(join(tmpdir(), 'mfh-')), 'copia.json');

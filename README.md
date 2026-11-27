@@ -95,4 +95,4 @@ El archivo resultante contiene datos personales. `.gitignore` lo excluye; no lo 
 
 `.github/workflows/deploy.yml` compila, pasa las pruebas y sube el resultado a la rama `gh-pages` con cada cambio en `main`. GitHub Pages sirve esa rama: en **Settings → Pages**, origen **Deploy from a branch**, rama `gh-pages` y carpeta `/ (root)`. La rama `gh-pages` solo contiene la app compilada; no se edita a mano.
 
-La app se sirve en `https://<usuario>.github.io/MFH/`; si cambia el nombre del repositorio, hay que cambiar `base` en `vite.config.ts`.
+La app se sirve en `https://<usuario>.github.io/<repositorio>/`. Usa rutas relativas, así que sigue funcionando si el repositorio cambia de nombre; solo cambia la dirección, y hay que volver a instalarla en el móvil desde la nueva.

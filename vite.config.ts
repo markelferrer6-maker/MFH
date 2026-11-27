@@ -2,8 +2,9 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// La app se sirve desde https://<usuario>.github.io/MFH/
-const base = '/MFH/';
+// Rutas relativas: la app funciona en cualquier carpeta, sea cual sea el nombre del
+// repositorio en GitHub Pages (https://<usuario>.github.io/<repositorio>/).
+const base = './';
 
 export default defineConfig({
   base,
@@ -18,8 +19,8 @@ export default defineConfig({
         short_name: 'MFH',
         description: 'Tu rutina y tu progreso, sin suscripciones.',
         lang: 'es',
-        start_url: base,
-        scope: base,
+        start_url: '.',
+        scope: '.',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#0b0d10',
