@@ -15,8 +15,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'MFH Entrenamiento',
-        short_name: 'MFH',
+        name: 'Fitness',
+        short_name: 'Fitness',
         description: 'Tu rutina y tu progreso, sin suscripciones.',
         lang: 'es',
         start_url: '.',

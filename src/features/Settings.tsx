@@ -108,8 +108,14 @@ export function Settings() {
     if (!first) return;
     const second = await confirmDialog({ title: 'Última confirmación', message: 'No se puede deshacer.', confirmLabel: 'Sí, borrar todo', danger: true });
     if (!second) return;
-    await db.transaction('rw', db.exercises, db.routines, db.workouts, db.settings, () =>
-      Promise.all([db.exercises.clear(), db.routines.clear(), db.workouts.clear(), db.settings.clear()]),
+    await db.transaction('rw', [db.exercises, db.routines, db.workouts, db.settings, db.measurements], () =>
+      Promise.all([
+        db.exercises.clear(),
+        db.routines.clear(),
+        db.workouts.clear(),
+        db.settings.clear(),
+        db.measurements.clear(),
+      ]),
     );
     restTimer.stop();
     setNotice({ ok: true, text: 'Datos borrados.' });
@@ -171,6 +177,20 @@ export function Settings() {
         </label>
         <label className="switch-row">
           <span className="grow">
+            Progresión automática
+            <span className="small muted" style={{ display: 'block' }}>
+              Sugiere el objetivo de cada serie: una repetición más o más peso al llegar al tope del rango.
+            </span>
+          </span>
+          <input
+            className="switch"
+            type="checkbox"
+            checked={settings.autoProgression}
+            onChange={(e) => setSetting('autoProgression', e.target.checked)}
+          />
+        </label>
+        <label className="switch-row">
+          <span className="grow">
             Sonido al terminar el descanso
             <span className="small muted" style={{ display: 'block' }}>
               Solo suena con la app abierta y en pantalla.
@@ -205,7 +225,7 @@ export function Settings() {
       </div>
 
       <p className="small muted" style={{ textAlign: 'center' }}>
-        MFH · compilada el {__BUILD_DATE__}
+        Fitness · compilada el {__BUILD_DATE__}
       </p>
     </Page>
   );

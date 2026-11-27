@@ -9,12 +9,21 @@ import {
   type WorkoutExercise,
   type WorkoutSet,
 } from '../db/schema';
+import {
+  applyProgression,
+  defaultProgression,
+  progressionLabel,
+  progressionSummary,
+  supportsProgression,
+} from '../domain/progression';
+import { STALL_SESSIONS } from '../domain/stats';
 import { nextSet, pickValues, toggleSet } from '../domain/workout';
 import { clock, setSummary } from '../lib/format';
-import { actionSheet } from './dialogs';
+import { actionSheet, openSheet } from './dialogs';
 import { ExerciseThumb } from './ExerciseHelp';
 import { Icon } from './Icon';
 import { AutoTextarea, NumberInput } from './inputs';
+import { ProgressionForm, StallInfo } from './Tools';
 
 /**
  * active: entreno en curso (referencia de la última vez + marcar serie hecha)
@@ -39,6 +48,8 @@ export function ExerciseCard({
   item,
   mode,
   superset,
+  autoProgression = false,
+  stalled = 0,
   onChange,
   onSetDone,
   onMenu,
@@ -48,6 +59,10 @@ export function ExerciseCard({
   item: WorkoutExercise;
   mode: CardMode;
   superset?: SupersetInfo;
+  /** Si la progresión automática está activada en Ajustes. */
+  autoProgression?: boolean;
+  /** Sesiones seguidas sin superar la mejor marca. */
+  stalled?: number;
   onChange: (item: WorkoutExercise) => void;
   onSetDone?: (setIndex: number) => void;
   onMenu: () => void;
@@ -59,6 +74,27 @@ export function ExerciseCard({
   const showPrev = mode === 'active';
   const showRpe = mode !== 'plan';
   const showCheck = mode === 'active';
+
+  // Progresión: al planificar una rutina se muestra la que se aplicará por defecto.
+  const canProgress = mode !== 'edit' && supportsProgression(type);
+  const progression =
+    item.progression === undefined && mode === 'plan' && autoProgression
+      ? defaultProgression(type, item.sets)
+      : item.progression;
+  const summary = mode === 'active' && progression ? progressionSummary(item.sets.filter((s) => !s.done)) : null;
+
+  const editProgression = () =>
+    openSheet(`Progresión · ${name}`, (close) => (
+      <ProgressionForm
+        value={progression}
+        type={type}
+        onSave={(p) => {
+          close();
+          const next = { ...item, progression: p };
+          onChange(mode === 'active' ? applyProgression(next, type) : next);
+        }}
+      />
+    ));
 
   const columns = [
     '36px',
@@ -186,7 +222,32 @@ export function ExerciseCard({
           <Icon name="timer" size={16} />
           {restLabel(item.restSeconds)}
         </button>
+        {canProgress && (
+          <button className="chip" onClick={editProgression} aria-label={`Progresión: ${progressionLabel(progression, type)}`}>
+            <Icon name="chart" size={16} />
+            {progressionLabel(progression, type)}
+          </button>
+        )}
+        {mode === 'active' && stalled >= STALL_SESSIONS && (
+          <button
+            className="chip warn"
+            onClick={() => openSheet('Estancamiento', <StallInfo sessions={stalled} name={name} />)}
+          >
+            Estancado
+          </button>
+        )}
       </div>
+      {summary && summary.moreWeight + summary.moreReps > 0 && (
+        <p className="small ex-goal">
+          Objetivo de hoy:{' '}
+          {[
+            summary.moreWeight > 0 && `más peso en ${summary.moreWeight} ${summary.moreWeight === 1 ? 'serie' : 'series'}`,
+            summary.moreReps > 0 && `una repetición más en ${summary.moreReps}`,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+        </p>
+      )}
 
       <div className="set-grid" style={{ gridTemplateColumns: columns }}>
         <div className="set-head">Serie</div>

@@ -24,10 +24,24 @@ export interface Settings {
   keepAwake: boolean;
   sound: boolean;
   defaultRest: number;
+  /** Sugerir el objetivo de cada serie con doble progresión. */
+  autoProgression: boolean;
+  /** Calculadora de discos: peso de la barra y discos disponibles. */
+  plateBar: number;
+  plates: number[];
+  /** Peso corporal objetivo, en kg. */
+  goalWeight?: number;
   lastBackupAt?: string;
 }
 
-export const DEFAULT_SETTINGS: Settings = { keepAwake: true, sound: true, defaultRest: 90 };
+export const DEFAULT_SETTINGS: Settings = {
+  keepAwake: true,
+  sound: true,
+  defaultRest: 90,
+  autoProgression: true,
+  plateBar: 20,
+  plates: [25, 20, 15, 10, 5, 2.5, 1.25],
+};
 
 export function useSettings(): Settings {
   const rows = useLiveQuery(() => db.settings.toArray(), []);

@@ -41,12 +41,23 @@ const H = 190;
 const M = { top: 22, right: 14, bottom: 22, left: 40 };
 
 /** Evolución de una sola métrica a lo largo del tiempo. */
-export function LineChart({ points, unit, title }: { points: LinePoint[]; unit: string; title: string }) {
+export function LineChart({
+  points,
+  unit,
+  title,
+  goal,
+}: {
+  points: LinePoint[];
+  unit: string;
+  title: string;
+  /** Valor objetivo: se dibuja como línea de referencia. */
+  goal?: number;
+}) {
   const [ref, width] = useWidth();
   const [hover, setHover] = useState<number | null>(null);
   const fmt = (v: number) => `${fmt1(v)}${unit === 'kg' ? ' kg' : unit ? ` ${unit}` : ''}`;
 
-  const values = points.map((p) => p.value);
+  const values = [...points.map((p) => p.value), ...(goal !== undefined ? [goal] : [])];
   const ticks = niceTicks(Math.min(...values), Math.max(...values));
   const y0 = ticks[0];
   const y1 = ticks[ticks.length - 1];
@@ -91,6 +102,14 @@ export function LineChart({ points, unit, title }: { points: LinePoint[]; unit: 
               </text>
             </g>
           ))}
+          {goal !== undefined && (
+            <g>
+              <line className="goal" x1={M.left} x2={width - M.right} y1={y(goal)} y2={y(goal)} />
+              <text className="tick" x={M.left + 4} y={y(goal) - 4} textAnchor="start">
+                Objetivo {fmt(goal)}
+              </text>
+            </g>
+          )}
           <text className="tick" x={M.left} y={H - 4} textAnchor="start">
             {points[0].label}
           </text>

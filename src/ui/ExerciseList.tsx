@@ -1,11 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { Exercise, Workout, WorkoutExercise } from '../db/schema';
-import { buildSets, lastPerformance, normalizeSupersets, toggleSupersetWithNext } from '../domain/workout';
+import { warmupSets } from '../domain/plates';
+import { exerciseSessions, sessionsWithoutProgress } from '../domain/stats';
+import { buildExercise, lastPerformance, normalizeSupersets, toggleSupersetWithNext } from '../domain/workout';
+import { useSettings } from '../lib/hooks';
 import { navigate } from '../lib/router';
-import { actionSheet, confirmDialog } from './dialogs';
+import { actionSheet, confirmDialog, openSheet } from './dialogs';
 import { ExerciseCard, type CardMode, type SupersetInfo } from './ExerciseCard';
 import { ExercisePicker } from './ExercisePicker';
 import { Icon } from './Icon';
+import { PlateCalculator } from './Tools';
 
 const SS_COLORS = ['var(--ss-1)', 'var(--ss-2)', 'var(--ss-3)', 'var(--ss-4)'];
 
@@ -49,15 +53,38 @@ export function ExerciseList({
     return m;
   }, [history]);
   const all = useMemo(() => [...exercises.values()], [exercises]);
+  const settings = useSettings();
+  // Sesiones sin mejorar de cada ejercicio del entreno, para avisar de estancamiento.
+  const ids = items.map((x) => x.exerciseId).join(',');
+  const stalled = useMemo(() => {
+    const m = new Map<string, number>();
+    if (mode !== 'active') return m;
+    for (const id of new Set(ids.split(',').filter(Boolean))) {
+      const ex = exercises.get(id);
+      if (ex) m.set(id, sessionsWithoutProgress(exerciseSessions(history, id), ex.type));
+    }
+    return m;
+  }, [mode, ids, exercises, history]);
+
+  // Progresión resuelta por la última llamada a freshSets (para el ejercicio recién añadido).
+  const progressionOf = useRef<WorkoutExercise['progression']>(undefined);
 
   /** Series iniciales de un ejercicio recién añadido, según la pantalla. */
   const freshSets = (exerciseId: string, count?: number) => {
     const previous = lastPerformance(history, exerciseId);
     if (mode === 'active') {
-      const built = buildSets([], previous);
-      if (count === undefined || built.length === count) return built;
-      return Array.from({ length: count }, (_, i) => built[i] ?? { type: 'normal' as const, done: false });
+      const type = exercises.get(exerciseId)?.type;
+      const built = buildExercise(
+        { exerciseId, restSeconds: defaultRest },
+        [],
+        history,
+        type ? { type, auto: settings.autoProgression } : undefined,
+      );
+      progressionOf.current = built.progression;
+      if (count === undefined || built.sets.length === count) return built.sets;
+      return Array.from({ length: count }, (_, i) => built.sets[i] ?? { type: 'normal' as const, done: false });
     }
+    progressionOf.current = undefined;
     const n = count ?? (previous.length || 3);
     return Array.from({ length: n }, (_, i) => {
       const p = previous[i];
@@ -68,14 +95,46 @@ export function ExerciseList({
   };
 
   const pick = (exerciseId: string) => {
+    const withProgression = (item: WorkoutExercise): WorkoutExercise => {
+      const { progression: _old, ...rest } = item;
+      return progressionOf.current === undefined ? rest : { ...rest, progression: progressionOf.current };
+    };
     if (picker?.replace !== undefined) {
       const i = picker.replace;
       const old = items[i];
-      onChange(items.map((x, j) => (j === i ? { ...old, exerciseId, sets: freshSets(exerciseId, old.sets.length) } : x)));
+      const sets = freshSets(exerciseId, old.sets.length);
+      onChange(items.map((x, j) => (j === i ? withProgression({ ...old, exerciseId, sets }) : x)));
     } else {
-      onChange([...items, { exerciseId, restSeconds: defaultRest, sets: freshSets(exerciseId) }]);
+      const sets = freshSets(exerciseId);
+      onChange([...items, withProgression({ exerciseId, restSeconds: defaultRest, sets })]);
     }
     setPicker(null);
+  };
+
+  /** Sustituye las series de calentamiento por unas generadas a partir de la primera serie de trabajo. */
+  const generateWarmup = async (i: number) => {
+    const item = items[i];
+    const first = item.sets.find((s) => s.type !== 'warmup');
+    const weight = first?.weightKg ?? first?.hint?.weightKg;
+    if (!weight) {
+      await confirmDialog({
+        title: 'Falta el peso de trabajo',
+        message: 'Pon primero el peso de la primera serie y vuelve a generar el calentamiento.',
+        confirmLabel: 'Entendido',
+        cancelLabel: 'Cerrar',
+      });
+      return;
+    }
+    const generated = warmupSets(weight).map((w) =>
+      mode === 'active'
+        ? { type: 'warmup' as const, done: false, hint: { weightKg: w.weightKg, reps: w.reps } }
+        : { ...w, done: false },
+    );
+    // Se conservan los calentamientos ya hechos; el resto se sustituye.
+    const kept = item.sets.filter((s) => s.type !== 'warmup' || s.done);
+    const done = kept.filter((s) => s.type === 'warmup');
+    const work = kept.filter((s) => s.type !== 'warmup');
+    onChange(items.map((x, j) => (j === i ? { ...item, sets: [...done, ...generated, ...work] } : x)));
   };
 
   const move = (i: number, dir: -1 | 1) => {
@@ -88,6 +147,7 @@ export function ExerciseList({
     const item = items[i];
     const name = exercises.get(item.exerciseId)?.name ?? 'Ejercicio';
     const linkedNext = item.supersetId !== undefined && items[i + 1]?.supersetId === item.supersetId;
+    const isWeight = exercises.get(item.exerciseId)?.type === 'weight_reps';
     const choice = await actionSheet({
       title: name,
       actions: [
@@ -97,6 +157,8 @@ export function ExerciseList({
           id: 'superset',
           label: linkedNext ? 'Separar del siguiente' : 'Hacer superserie con el siguiente',
         },
+        isWeight && mode !== 'edit' && { id: 'warmup', label: 'Generar series de calentamiento' },
+        isWeight && { id: 'plates', label: 'Calculadora de discos' },
         { id: 'replace', label: 'Sustituir por otro ejercicio' },
         exercises.has(item.exerciseId) && { id: 'progress', label: 'Ver progreso' },
         { id: 'remove', label: 'Quitar ejercicio', danger: true },
@@ -105,7 +167,11 @@ export function ExerciseList({
     if (choice === 'up') move(i, -1);
     else if (choice === 'down') move(i, 1);
     else if (choice === 'superset') onChange(toggleSupersetWithNext(items, i));
-    else if (choice === 'replace') setPicker({ replace: i });
+    else if (choice === 'warmup') await generateWarmup(i);
+    else if (choice === 'plates') {
+      const next = item.sets.find((s) => !s.done && s.type !== 'warmup') ?? item.sets.find((s) => s.type !== 'warmup');
+      void openSheet('Calculadora de discos', <PlateCalculator initial={next?.weightKg ?? next?.hint?.weightKg} />);
+    } else if (choice === 'replace') setPicker({ replace: i });
     else if (choice === 'progress') navigate(`/exercise/${item.exerciseId}`);
     else if (choice === 'remove') {
       const hasData = item.sets.some((s) => s.done || s.weightKg !== undefined || s.reps !== undefined);
@@ -127,6 +193,8 @@ export function ExerciseList({
           item={item}
           mode={mode}
           superset={supersets[i]}
+          autoProgression={settings.autoProgression}
+          stalled={stalled.get(item.exerciseId)}
           onChange={(next) => onChange(items.map((x, j) => (j === i ? next : x)))}
           onSetDone={onSetDone ? (s) => onSetDone(i, s) : undefined}
           onMenu={() => menu(i)}

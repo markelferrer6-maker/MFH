@@ -19,6 +19,7 @@ const toRoutine = (e: WorkoutExercise): RoutineExercise => {
   };
   if (e.notes) out.notes = e.notes;
   if (e.supersetId !== undefined) out.supersetId = e.supersetId;
+  if (e.progression !== undefined) out.progression = e.progression;
   return out;
 };
 

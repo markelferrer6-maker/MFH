@@ -88,10 +88,42 @@ export interface WorkoutSet extends PlannedSet {
   prev?: SetValues & { rpe?: number };
 }
 
+/**
+ * Doble progresión: se trabaja en un rango de repeticiones; al llegar al tope en una
+ * serie, la siguiente vez se sube el peso `increment` kg y se vuelve al mínimo.
+ */
+export interface Progression {
+  repMin: number;
+  repMax: number;
+  increment: number;
+}
+
+export type MeasureKind = 'weight' | 'fat' | 'waist' | 'chest' | 'arm' | 'thigh' | 'hips';
+
+export const MEASURES: Record<MeasureKind, { label: string; unit: string }> = {
+  weight: { label: 'Peso corporal', unit: 'kg' },
+  fat: { label: 'Grasa corporal', unit: '%' },
+  waist: { label: 'Cintura', unit: 'cm' },
+  chest: { label: 'Pecho', unit: 'cm' },
+  arm: { label: 'Brazo', unit: 'cm' },
+  thigh: { label: 'Muslo', unit: 'cm' },
+  hips: { label: 'Cadera', unit: 'cm' },
+};
+
+export interface Measurement {
+  id: string;
+  kind: MeasureKind;
+  /** Fecha y hora en ISO 8601. */
+  date: string;
+  value: number;
+}
+
 interface ExerciseSlot {
   exerciseId: string;
   notes?: string;
   restSeconds: number;
+  /** undefined: progresión automática por defecto; null: desactivada para este ejercicio. */
+  progression?: Progression | null;
   /** Los ejercicios consecutivos con el mismo número forman una superserie. */
   supersetId?: number;
 }

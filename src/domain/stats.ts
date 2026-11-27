@@ -220,3 +220,99 @@ export function weeklyCounts(workouts: Workout[], weeks: number, now = new Date(
   }
   return out;
 }
+
+/* ---------- Estancamiento ---------- */
+
+/**
+ * Número de sesiones seguidas, contando desde la última, en las que no se ha superado
+ * la mejor marca anterior (1RM estimado con peso; repeticiones en ejercicios sin peso).
+ */
+export function sessionsWithoutProgress(sessions: SessionStat[], type: Exercise['type']): number {
+  const value = type === 'weight_reps' ? RECORD_VALUE.e1rm : type === 'reps' ? RECORD_VALUE.reps : undefined;
+  if (!value || sessions.length < 2) return 0;
+  let best = 0;
+  let streak = 0;
+  for (const s of sessions) {
+    const v = value(s);
+    if (v > best + 1e-9) {
+      best = v;
+      streak = 0;
+    } else {
+      streak++;
+    }
+  }
+  return streak;
+}
+
+/** A partir de cuántas sesiones sin mejorar se avisa de estancamiento. */
+export const STALL_SESSIONS = 3;
+
+/* ---------- Volumen por grupo muscular ---------- */
+
+/** Series de trabajo por grupo muscular en los entrenos terminados entre dos fechas. */
+export function muscleSets(
+  workouts: Workout[],
+  exercises: Map<string, Exercise>,
+  from: Date,
+  to: Date,
+): Map<string, number> {
+  const out = new Map<string, number>();
+  const a = from.toISOString();
+  const b = to.toISOString();
+  for (const w of workouts) {
+    if (w.status !== 'done') continue;
+    const t = new Date(w.startedAt).toISOString();
+    if (t < a || t >= b) continue;
+    for (const e of w.exercises) {
+      const muscle = exercises.get(e.exerciseId)?.muscle;
+      if (!muscle) continue;
+      const n = countedSets(e.sets).length;
+      if (n > 0) out.set(muscle, (out.get(muscle) ?? 0) + n);
+    }
+  }
+  return out;
+}
+
+/* ---------- Calendario y racha ---------- */
+
+/** Clave de día en hora local: "2026-11-27". */
+export function dayKey(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+export interface DayActivity {
+  sets: number;
+  workoutIds: string[];
+}
+
+/** Actividad por día (hora local) de los entrenos terminados. */
+export function activityByDay(workouts: Workout[]): Map<string, DayActivity> {
+  const out = new Map<string, DayActivity>();
+  for (const w of workouts) {
+    if (w.status !== 'done') continue;
+    const key = dayKey(new Date(w.startedAt));
+    const day = out.get(key) ?? { sets: 0, workoutIds: [] };
+    day.sets += workoutSetCount(w);
+    day.workoutIds.push(w.id);
+    out.set(key, day);
+  }
+  return out;
+}
+
+/**
+ * Semanas seguidas con al menos un entreno. La semana en curso cuenta si ya tiene
+ * entreno; si todavía no, la racha no se rompe hasta que termine.
+ */
+export function weekStreak(workouts: Workout[], now = new Date()): number {
+  const weeks = new Set<number>();
+  for (const w of workouts) if (w.status === 'done') weeks.add(weekStart(new Date(w.startedAt)).getTime());
+  const cursor = weekStart(now);
+  if (!weeks.has(cursor.getTime())) cursor.setDate(cursor.getDate() - 7);
+  let streak = 0;
+  while (weeks.has(weekStart(cursor).getTime())) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 7);
+  }
+  return streak;
+}

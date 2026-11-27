@@ -61,6 +61,24 @@ describe('copia de seguridad', () => {
     expect(await other.settings.toArray()).toEqual([{ key: 'sound', value: false }]);
   });
 
+  it('las medidas corporales y la progresión viajan en la copia', async () => {
+    await seed(db);
+    await db.measurements.put({ id: 'm1', kind: 'weight', date: '2026-01-10T08:00:00.000Z', value: 78.4 });
+    await db.routines.put({ ...routine, exercises: [{ ...routine.exercises[0], progression: { repMin: 8, repMax: 10, increment: 2.5 } }] });
+    const json = JSON.stringify(await exportBackup(db));
+    const other = new MfhDB(`test-${n++}`);
+    await importBackup(other, validateBackup(JSON.parse(json)), 'replace');
+    expect(await other.measurements.toArray()).toEqual([{ id: 'm1', kind: 'weight', date: '2026-01-10T08:00:00.000Z', value: 78.4 }]);
+    expect((await other.routines.get('r1'))?.exercises[0].progression).toEqual({ repMin: 8, repMax: 10, increment: 2.5 });
+  });
+
+  it('acepta copias antiguas sin medidas y descarta medidas no válidas', () => {
+    const old = { app: 'mfh', version: 1, exportedAt: '', exercises: [], routines: [], workouts: [], settings: [] };
+    expect(validateBackup(old).measurements).toEqual([]);
+    const dirty = { ...old, measurements: [{ id: 'a', kind: 'altura', date: '2026-01-01', value: 180 }, { id: 'b', kind: 'weight', date: 'ayer', value: 80 }, { id: 'c', kind: 'weight', date: '2026-01-01T00:00:00Z', value: 80 }] };
+    expect(validateBackup(dirty).measurements).toEqual([{ id: 'c', kind: 'weight', date: '2026-01-01T00:00:00Z', value: 80 }]);
+  });
+
   it('combinar añade sin borrar lo que ya había', async () => {
     await seed(db);
     const extra: Workout = { ...workout, id: 'w2', startedAt: '2026-11-26T10:00:00Z', finishedAt: '2026-11-26T11:00:00Z' };
@@ -90,7 +108,7 @@ describe('copia de seguridad', () => {
 describe('validateBackup', () => {
   const base = { app: 'mfh', version: 1, exportedAt: '', exercises: [exercise], routines: [routine], workouts: [workout], settings: [] };
   it('rechaza archivos que no son de MFH', () => {
-    expect(() => validateBackup({ hola: 1 })).toThrow('no es una copia de MFH');
+    expect(() => validateBackup({ hola: 1 })).toThrow('no es una copia de Fitness');
     expect(() => validateBackup(null)).toThrow();
     expect(() => validateBackup({ ...base, version: 2 })).toThrow('versión');
   });

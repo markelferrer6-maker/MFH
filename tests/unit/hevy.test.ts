@@ -53,7 +53,7 @@ const { backup, warnings } = convertHevy(dump, { now: new Date('2026-11-27T12:00
 
 describe('convertHevy', () => {
   it('produce una copia que la app acepta sin cambios', () => {
-    expect(validateBackup(JSON.parse(JSON.stringify(backup)))).toEqual(backup);
+    expect(validateBackup(JSON.parse(JSON.stringify(backup)))).toEqual({ ...backup, measurements: [] });
   });
 
   it('usa el nombre en español del entreno más reciente y traduce músculo y tipo', () => {

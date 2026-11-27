@@ -51,7 +51,7 @@ export function Home() {
   const lastDone = useMemo(() => lastDoneByRoutine(done ?? []), [done]);
   const suggested = useMemo(() => suggestRoutine(routines ?? [], done ?? []), [routines, done]);
 
-  if (!routines || !done || !exercises || active === undefined) return <Page title="MFH">{null}</Page>;
+  if (!routines || !done || !exercises || active === undefined) return <Page title="Fitness">{null}</Page>;
 
   const backupAge = settings.lastBackupAt ? daysBetween(settings.lastBackupAt) : null;
   const needsBackup = done.length > 0 && (backupAge === null || backupAge > 7);
@@ -90,7 +90,7 @@ export function Home() {
   };
 
   return (
-    <Page title="MFH">
+    <Page title="Fitness">
       <InstallHint />
 
       {needsBackup && (

@@ -1,4 +1,4 @@
-# MFH
+# Fitness
 
 App de entrenamiento personal: rutinas, registro de series y progreso. Es una web instalable (PWA) pensada para el iPhone. Funciona sin conexión, no tiene cuentas ni servidor y no cuesta nada.
 
@@ -8,6 +8,10 @@ App de entrenamiento personal: rutinas, registro de series y progreso. Es una we
 - **Entreno en curso**: cada serie muestra lo que hiciste la última vez y viene sugerida con esos valores; un toque la marca como hecha y arranca el descanso.
 - **Catálogo de máquinas** de gimnasio para añadir ejercicios con un toque.
 - **Fotos de cada ejercicio** (posición inicial y final) al tocar su miniatura.
+- **Progresión automática** (doble progresión por serie): sugiere una repetición más o más peso al llegar al tope del rango, y avisa si llevas tres sesiones sin mejorar.
+- **Calculadora de discos** y **series de calentamiento** generadas a partir de la primera serie de trabajo.
+- **Calendario** de entrenos con racha de semanas y **series por grupo muscular** con figura del cuerpo.
+- **Peso corporal y medidas** con gráfica y objetivo.
 - **Historial** editable de todos los entrenos.
 - **Progreso** por ejercicio: peso máximo, 1RM estimado (fórmula de Epley), volumen y récords personales.
 - **Copia de seguridad** en un archivo JSON que exportas e importas cuando quieras.

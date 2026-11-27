@@ -57,7 +57,7 @@ type Request =
       danger: boolean;
       resolve: (ok: boolean) => void;
     }
-  | { kind: 'content'; title: string; content: ReactNode; resolve: () => void }
+  | { kind: 'content'; title: string; content: SheetContent; resolve: () => void }
   | { kind: 'actions'; title: string; actions: Action[]; grid: boolean; resolve: (id: string | undefined) => void }
   | {
       kind: 'prompt';
@@ -119,8 +119,11 @@ export function actionSheet<T extends string>(opts: {
   );
 }
 
+/** Contenido de una hoja: fijo, o una función que recibe cómo cerrarla (para formularios). */
+export type SheetContent = ReactNode | ((close: () => void) => ReactNode);
+
 /** Abre una hoja con contenido libre (por ejemplo, las fotos de un ejercicio). */
-export function openSheet(title: string, content: ReactNode): Promise<void> {
+export function openSheet(title: string, content: SheetContent): Promise<void> {
   return new Promise((resolve) => push({ kind: 'content', title, content, resolve }));
 }
 
@@ -193,7 +196,7 @@ export function DialogHost() {
   if (req.kind === 'content') {
     return (
       <Sheet title={req.title} onClose={() => finish(undefined)}>
-        {req.content}
+        {typeof req.content === 'function' ? req.content(() => finish(undefined)) : req.content}
       </Sheet>
     );
   }

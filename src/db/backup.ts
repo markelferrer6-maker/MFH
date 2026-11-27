@@ -2,7 +2,10 @@ import type { MfhDB } from './db';
 import type {
   Exercise,
   ExerciseType,
+  MeasureKind,
+  Measurement,
   PlannedSet,
+  Progression,
   Routine,
   RoutineExercise,
   SetType,
@@ -20,6 +23,8 @@ export interface Backup {
   routines: Routine[];
   workouts: Workout[];
   settings: Setting[];
+  /** Medidas corporales. Opcional: las copias antiguas no lo traen. */
+  measurements?: Measurement[];
 }
 
 export interface ImportResult {
@@ -32,11 +37,12 @@ export interface ImportResult {
 const LOCAL_ONLY_SETTINGS = new Set(['lastBackupAt']);
 
 export async function exportBackup(db: MfhDB, now = new Date()): Promise<Backup> {
-  const [exercises, routines, workouts, settings] = await Promise.all([
+  const [exercises, routines, workouts, settings, measurements] = await Promise.all([
     db.exercises.toArray(),
     db.routines.toArray(),
     db.workouts.toArray(),
     db.settings.toArray(),
+    db.measurements.toArray(),
   ]);
   return {
     app: 'mfh',
@@ -46,6 +52,7 @@ export async function exportBackup(db: MfhDB, now = new Date()): Promise<Backup>
     routines,
     workouts,
     settings: settings.filter((s) => !LOCAL_ONLY_SETTINGS.has(s.key)),
+    measurements,
   };
 }
 
@@ -53,6 +60,8 @@ class BackupError extends Error {}
 
 const EXERCISE_TYPES: ExerciseType[] = ['weight_reps', 'reps', 'duration', 'distance_duration'];
 const SET_TYPES: SetType[] = ['normal', 'warmup', 'dropset', 'failure'];
+// Solo tipos importados de ./schema: este módulo también se ejecuta desde Node en scripts/.
+const MEASURE_KINDS: MeasureKind[] = ['weight', 'fat', 'waist', 'chest', 'arm', 'thigh', 'hips'];
 
 function isObj(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -122,9 +131,20 @@ function parseWorkoutSet(v: unknown, where: string): WorkoutSet {
   });
 }
 
+function parseProgression(v: unknown): Progression | null | undefined {
+  if (v === null) return null;
+  if (!isObj(v)) return undefined;
+  const repMin = optNum(v.repMin);
+  const repMax = optNum(v.repMax);
+  const increment = optNum(v.increment);
+  if (repMin === undefined || repMax === undefined || increment === undefined || repMax < repMin) return undefined;
+  return { repMin, repMax, increment };
+}
+
 function parseSlot(v: unknown, where: string) {
   if (!isObj(v)) throw new BackupError(`Ejercicio no válido en ${where}.`);
   return {
+    progression: parseProgression(v.progression),
     exerciseId: str(v.exerciseId, `${where} (exerciseId)`),
     notes: optStr(v.notes),
     restSeconds: optNum(v.restSeconds) ?? 0,
@@ -192,10 +212,10 @@ function parseWorkout(v: unknown, i: number): Workout {
  */
 export function validateBackup(data: unknown): Backup {
   if (!isObj(data) || data.app !== 'mfh') {
-    throw new BackupError('Este archivo no es una copia de MFH.');
+    throw new BackupError('Este archivo no es una copia de Fitness.');
   }
   if (data.version !== 1) {
-    throw new BackupError('La copia es de una versión de MFH que esta app no entiende.');
+    throw new BackupError('La copia es de una versión de la app que esta no entiende.');
   }
   const exercises = arr(data.exercises, 'exercises').map(parseExercise);
   const routines = arr(data.routines, 'routines').map(parseRoutine);
@@ -206,6 +226,15 @@ export function validateBackup(data: unknown): Backup {
           ? [{ key: s.key, value: s.value }]
           : [],
       )
+    : [];
+
+  const measurements: Measurement[] = Array.isArray(data.measurements)
+    ? data.measurements.flatMap((m) => {
+        if (!isObj(m) || typeof m.id !== 'string' || !MEASURE_KINDS.includes(m.kind as MeasureKind)) return [];
+        const value = optNum(m.value);
+        if (value === undefined || typeof m.date !== 'string' || Number.isNaN(Date.parse(m.date))) return [];
+        return [{ id: m.id, kind: m.kind as MeasureKind, date: m.date, value }];
+      })
     : [];
 
   const known = new Set(exercises.map((e) => e.id));
@@ -224,6 +253,7 @@ export function validateBackup(data: unknown): Backup {
     routines,
     workouts,
     settings,
+    measurements,
   };
 }
 
@@ -237,9 +267,15 @@ export async function importBackup(
   backup: Backup,
   mode: 'merge' | 'replace',
 ): Promise<ImportResult> {
-  await db.transaction('rw', db.exercises, db.routines, db.workouts, db.settings, async () => {
+  await db.transaction('rw', [db.exercises, db.routines, db.workouts, db.settings, db.measurements], async () => {
     if (mode === 'replace') {
-      await Promise.all([db.exercises.clear(), db.routines.clear(), db.workouts.clear(), db.settings.clear()]);
+      await Promise.all([
+        db.exercises.clear(),
+        db.routines.clear(),
+        db.workouts.clear(),
+        db.settings.clear(),
+        db.measurements.clear(),
+      ]);
       await db.settings.bulkPut(backup.settings);
     }
     let workouts = backup.workouts;
@@ -251,6 +287,7 @@ export async function importBackup(
     await db.exercises.bulkPut(backup.exercises);
     await db.routines.bulkPut(backup.routines);
     await db.workouts.bulkPut(workouts);
+    await db.measurements.bulkPut(backup.measurements ?? []);
   });
   return {
     exercises: backup.exercises.length,

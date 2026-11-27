@@ -1,11 +1,12 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { Exercise, Routine, Setting, Workout } from './schema';
+import type { Exercise, Measurement, Routine, Setting, Workout } from './schema';
 
 export class MfhDB extends Dexie {
   exercises!: EntityTable<Exercise, 'id'>;
   routines!: EntityTable<Routine, 'id'>;
   workouts!: EntityTable<Workout, 'id'>;
   settings!: EntityTable<Setting, 'key'>;
+  measurements!: EntityTable<Measurement, 'id'>;
 
   constructor(name = 'mfh') {
     super(name);
@@ -15,6 +16,7 @@ export class MfhDB extends Dexie {
       workouts: 'id, status, startedAt, routineId',
       settings: 'key',
     });
+    this.version(2).stores({ measurements: 'id, kind, date' });
   }
 }
 

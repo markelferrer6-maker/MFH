@@ -1,4 +1,5 @@
 import { useSyncExternalStore, type CSSProperties, type ReactNode } from 'react';
+import { Body } from './features/Body';
 import { Home } from './features/Home';
 import { History, WorkoutDetail } from './features/History';
 import { ExerciseDetail, Progress } from './features/Progress';
@@ -22,6 +23,7 @@ export function App() {
   else if (section === 'routine' && id) screen = <RoutineEditor key={id} id={id} />;
   else if (section === 'history' && id) screen = <WorkoutDetail key={id} id={id} />;
   else if (section === 'exercise' && id) screen = <ExerciseDetail key={id} id={id} />;
+  else if (section === 'body') screen = <Body />;
   else {
     tabs = true;
     if (section === 'history') screen = <History />;

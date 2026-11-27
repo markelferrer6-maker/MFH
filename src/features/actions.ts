@@ -1,7 +1,7 @@
 import { exportBackup } from '../db/backup';
-import { db, setSetting } from '../db/db';
+import { db, getSetting, setSetting } from '../db/db';
 import type { Routine } from '../db/schema';
-import { buildEmptyWorkout, buildWorkoutFromRoutine } from '../domain/workout';
+import { buildEmptyWorkout, buildWorkoutFromRoutine, rememberProgression } from '../domain/workout';
 import { restTimer } from '../lib/restTimer';
 import { navigate } from '../lib/router';
 import { actionSheet } from '../ui/dialogs';
@@ -23,7 +23,17 @@ export async function startWorkout(routine?: Routine): Promise<void> {
     restTimer.stop();
   }
   const history = await db.workouts.where('status').equals('done').toArray();
-  await db.workouts.add(routine ? buildWorkoutFromRoutine(routine, history) : buildEmptyWorkout());
+  if (routine) {
+    const exercises = new Map((await db.exercises.toArray()).map((e) => [e.id, e]));
+    const auto = await getSetting('autoProgression', true);
+    const workout = buildWorkoutFromRoutine(routine, history, new Date(), { exercises, auto });
+    await db.workouts.add(workout);
+    // Fija en la rutina el rango de repeticiones que se acaba de resolver.
+    const remembered = rememberProgression(routine, workout);
+    if (remembered !== routine && (await db.routines.get(routine.id))) await db.routines.put(remembered);
+  } else {
+    await db.workouts.add(buildEmptyWorkout());
+  }
   navigate('/workout');
 }
 
@@ -36,13 +46,13 @@ export async function exportToFile(): Promise<boolean> {
   const now = new Date();
   const backup = await exportBackup(db, now);
   const p = (n: number) => String(n).padStart(2, '0');
-  const name = `mfh-backup-${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}.json`;
+  const name = `fitness-copia-${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}.json`;
   const file = new File([JSON.stringify(backup)], name, { type: 'application/json' });
 
   const touch = window.matchMedia('(pointer: coarse)').matches;
   if (touch && navigator.canShare?.({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], title: 'Copia de MFH' });
+      await navigator.share({ files: [file], title: 'Copia de Fitness' });
     } catch (e) {
       if (e instanceof DOMException && e.name === 'AbortError') return false;
       throw e;

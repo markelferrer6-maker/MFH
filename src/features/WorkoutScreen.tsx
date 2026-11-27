@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { db } from '../db/db';
 import type { Workout, WorkoutExercise } from '../db/schema';
-import { doneSetCount, finishWorkout, routineFromWorkout, structureDiffers } from '../domain/workout';
+import {
+  doneSetCount,
+  finishWorkout,
+  routineFromWorkout,
+  structureDiffers,
+  syncProgression,
+} from '../domain/workout';
 import { clock } from '../lib/format';
 import { useDoneWorkouts, useExerciseMap, useNow, useSettings, useWakeLock } from '../lib/hooks';
 import { restTimer } from '../lib/restTimer';
@@ -94,7 +100,13 @@ export function WorkoutScreen() {
     await db.workouts.put(finished);
     restTimer.stop();
 
-    const routine = finished.routineId ? await db.routines.get(finished.routineId) : undefined;
+    let routine = finished.routineId ? await db.routines.get(finished.routineId) : undefined;
+    if (routine) {
+      // Los ajustes de progresión cambiados durante el entreno se guardan siempre en la rutina.
+      const synced = syncProgression(routine, finished);
+      if (synced !== routine) await db.routines.put(synced);
+      routine = synced;
+    }
     if (routine && structureDiffers(routine, finished)) {
       const updateRoutine = await confirmDialog({
         title: '¿Actualizar la rutina?',

@@ -179,6 +179,14 @@ try {
   assert(/\d/.test(prevText), `muestra la referencia de la última vez (${prevText})`);
   await shot(page, 'entreno-inicio');
 
+  // Progresión: con los datos de ejemplo, la última vez fueron 57,5 kg × 8 y × 7 en un rango 8–10.
+  if (!process.env.MFH_IMPORT) {
+    const placeholders = await first.locator('.set-input').evaluateAll((els) => els.map((e) => e.placeholder));
+    assert(placeholders.join(' ') === '40 10 57,5 9 57,5 8', `sugiere una repetición más que la última vez (${placeholders.join(' ')})`);
+    assert(/8–10 reps/.test(await first.locator('.ex-meta').innerText()), 'muestra el rango de la progresión');
+    assert(/una repetición más en 2/.test(await first.locator('.ex-goal').innerText()), 'resume el objetivo de hoy');
+  }
+
   // Fotos del ejercicio: miniatura en la tarjeta y vista grande al tocarla.
   if (firstExercise.hevyTemplateId) {
     const help = first.getByRole('button', { name: /Ver cómo se hace/ });
@@ -219,6 +227,17 @@ try {
   }
   await first.getByRole('button', { name: 'Añadir serie' }).click();
   await shot(page, 'entreno-series');
+
+  // Herramientas del ejercicio: calculadora de discos y calentamiento generado.
+  if (firstExercise.type === 'weight_reps') {
+    await first.getByRole('button', { name: /^Opciones de/ }).click();
+    await page.getByRole('button', { name: 'Calculadora de discos' }).click();
+    await page.getByLabel('Peso total en kg').fill('100');
+    await page.getByText('25 + 15', { exact: true }).waitFor();
+    assert(true, 'la calculadora de discos reparte 100 kg en 25 + 15 por lado');
+    await shot(page, 'discos');
+    await page.getByRole('button', { name: 'Cerrar' }).click();
+  }
 
   // Añadir una máquina del catálogo que no estaba en la biblioteca.
   await page.getByRole('button', { name: 'Añadir ejercicio' }).click();
@@ -268,13 +287,28 @@ try {
   assert(true, 'la gráfica muestra el valor al pasar el dedo');
   await shot(page, 'ejercicio');
 
+  console.log('Medidas y resumen');
+  await page.getByRole('button', { name: 'Volver' }).click();
+  await page.locator('.cal-grid button').first().waitFor();
+  assert((await page.locator('.cal-grid button').count()) >= 1, 'el calendario marca los días con entreno');
+  assert((await page.locator('.muscle-row').count()) >= 1, 'se muestran las series por músculo');
+  await page.getByRole('button', { name: 'Registrar peso' }).click();
+  await page.getByLabel('Peso corporal en kg').fill('78,4');
+  await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
+  await page.getByText(/78,4 kg/).first().waitFor();
+  assert(true, 'se registra el peso corporal');
+  await page.getByRole('button', { name: 'Medidas' }).click();
+  await page.getByRole('heading', { name: 'Registros' }).waitFor();
+  await shot(page, 'medidas');
+
   console.log('Copia de seguridad');
   await page.getByRole('button', { name: 'Volver' }).click();
   await page.getByRole('button', { name: 'Ajustes' }).click();
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Exportar copia' }).click()]);
   const exported = JSON.parse(readFileSync(await download.path(), 'utf8'));
   assert(exported.app === 'mfh' && exported.workouts.length === imported.workouts.length + 1, 'la copia exportada incluye el entreno nuevo');
-  assert(/^mfh-backup-\d{4}-\d{2}-\d{2}\.json$/.test(download.suggestedFilename()), `nombre del archivo: ${download.suggestedFilename()}`);
+  assert(exported.measurements?.length === 1 && exported.measurements[0].value === 78.4, 'la copia incluye las medidas corporales');
+  assert(/^fitness-copia-\d{4}-\d{2}-\d{2}\.json$/.test(download.suggestedFilename()), `nombre del archivo: ${download.suggestedFilename()}`);
 
   console.log('Sin conexión');
   await page.evaluate(() => navigator.serviceWorker.ready);

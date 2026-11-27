@@ -1,6 +1,9 @@
 import {
   uid,
+  type Exercise,
+  type ExerciseType,
   type PlannedSet,
+  type Progression,
   type Routine,
   type RoutineExercise,
   type SetValues,
@@ -8,6 +11,7 @@ import {
   type WorkoutExercise,
   type WorkoutSet,
 } from '../db/schema';
+import { defaultProgression, suggestNext } from './progression';
 
 const VALUE_KEYS = ['weightKg', 'reps', 'durationSec', 'distanceM'] as const;
 
@@ -42,7 +46,11 @@ export function lastPerformance(workouts: Workout[], exerciseId: string, before?
  * Cada serie queda vacía, con la última vez como referencia (`prev`) y un valor
  * sugerido (`hint`): lo de la última vez o, si no hay, lo planificado en la rutina.
  */
-export function buildSets(planned: PlannedSet[], previous: WorkoutSet[]): WorkoutSet[] {
+export function buildSets(
+  planned: PlannedSet[],
+  previous: WorkoutSet[],
+  progress?: { type: ExerciseType; progression: Progression | null | undefined },
+): WorkoutSet[] {
   const count = planned.length > 0 ? planned.length : Math.max(previous.length, 1);
   const out: WorkoutSet[] = [];
   for (let i = 0; i < count; i++) {
@@ -52,7 +60,14 @@ export function buildSets(planned: PlannedSet[], previous: WorkoutSet[]): Workou
     if (prev) {
       set.prev = { ...pickValues(prev), ...(prev.rpe !== undefined ? { rpe: prev.rpe } : {}) };
     }
-    const hint = prev && hasValues(prev) ? pickValues(prev) : plan ? pickValues(plan) : {};
+    const type = plan?.type ?? prev?.type ?? 'normal';
+    const fromPrev =
+      prev && hasValues(prev)
+        ? progress?.progression && type !== 'warmup'
+          ? suggestNext(pickValues(prev), progress.progression, progress.type)
+          : pickValues(prev)
+        : undefined;
+    const hint = fromPrev ?? (plan ? pickValues(plan) : {});
     if (hasValues(hint)) set.hint = hint;
     out.push(set);
   }
@@ -60,28 +75,43 @@ export function buildSets(planned: PlannedSet[], previous: WorkoutSet[]): Workou
 }
 
 export function buildExercise(
-  slot: Pick<RoutineExercise, 'exerciseId' | 'notes' | 'restSeconds' | 'supersetId'>,
+  slot: Pick<RoutineExercise, 'exerciseId' | 'notes' | 'restSeconds' | 'supersetId' | 'progression'>,
   planned: PlannedSet[],
   history: Workout[],
+  /** Tipo del ejercicio y si se aplica la progresión automática. Sin esto no hay progresión. */
+  opts?: { type: ExerciseType; auto: boolean },
 ): WorkoutExercise {
+  const previous = lastPerformance(history, slot.exerciseId);
+  let progression: Progression | null | undefined = slot.progression;
+  if (opts && progression === undefined && opts.auto) progression = defaultProgression(opts.type, planned, previous);
   const ex: WorkoutExercise = {
     exerciseId: slot.exerciseId,
     restSeconds: slot.restSeconds,
-    sets: buildSets(planned, lastPerformance(history, slot.exerciseId)),
+    sets: buildSets(planned, previous, opts ? { type: opts.type, progression } : undefined),
   };
+  if (progression !== undefined) ex.progression = progression;
   if (slot.notes) ex.notes = slot.notes;
   if (slot.supersetId !== undefined) ex.supersetId = slot.supersetId;
   return ex;
 }
 
-export function buildWorkoutFromRoutine(routine: Routine, history: Workout[], now = new Date()): Workout {
+export function buildWorkoutFromRoutine(
+  routine: Routine,
+  history: Workout[],
+  now = new Date(),
+  /** Con la biblioteca de ejercicios se calculan los objetivos de progresión. */
+  opts?: { exercises: Map<string, Exercise>; auto: boolean },
+): Workout {
   return {
     id: uid(),
     routineId: routine.id,
     name: routine.name,
     startedAt: now.toISOString(),
     status: 'active',
-    exercises: routine.exercises.map((re) => buildExercise(re, re.sets, history)),
+    exercises: routine.exercises.map((re) => {
+      const exercise = opts?.exercises.get(re.exerciseId);
+      return buildExercise(re, re.sets, history, exercise ? { type: exercise.type, auto: opts!.auto } : undefined);
+    }),
   };
 }
 
@@ -145,9 +175,26 @@ export function routineFromWorkout(routine: Routine, finished: Workout, now = ne
       };
       if (e.notes) re.notes = e.notes;
       if (e.supersetId !== undefined) re.supersetId = e.supersetId;
+      if (e.progression !== undefined) re.progression = e.progression;
       return re;
     }),
   };
+}
+
+/**
+ * Guarda en la rutina la progresión que se resolvió al empezar el entreno, para que el
+ * rango de repeticiones quede fijo y no cambie cuando cambien las series planificadas.
+ * Devuelve la misma rutina si no hay nada que guardar.
+ */
+export function rememberProgression(routine: Routine, workout: Workout): Routine {
+  let changed = false;
+  const exercises = routine.exercises.map((re, i) => {
+    const we = workout.exercises[i];
+    if (re.progression !== undefined || !we || we.exerciseId !== re.exerciseId || !we.progression) return re;
+    changed = true;
+    return { ...re, progression: we.progression };
+  });
+  return changed ? { ...routine, exercises } : routine;
 }
 
 /** Fecha del último entreno terminado de cada rutina. */
@@ -225,4 +272,21 @@ export function structureDiffers(routine: Routine, finished: Workout): boolean {
       re.sets.some((s, j) => s.type !== we.sets[j].type)
     );
   });
+}
+
+/**
+ * Lleva a la rutina los cambios de progresión hechos durante el entreno (rango, incremento
+ * o desactivarla), aunque no se actualice el resto de la rutina.
+ * Devuelve la misma rutina si no cambia nada.
+ */
+export function syncProgression(routine: Routine, finished: Workout): Routine {
+  let changed = false;
+  const exercises = routine.exercises.map((re) => {
+    const we = finished.exercises.find((e) => e.exerciseId === re.exerciseId);
+    if (!we || we.progression === undefined) return re;
+    if (JSON.stringify(we.progression) === JSON.stringify(re.progression ?? undefined)) return re;
+    changed = true;
+    return { ...re, progression: we.progression };
+  });
+  return changed ? { ...routine, exercises } : routine;
 }

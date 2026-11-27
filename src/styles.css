@@ -14,6 +14,7 @@
   --warn: #d28e05;
   --series-1: #338ced;
   --grid: #262b33;
+  --map-empty: #262c35;
   --ss-1: #e76624;
   --ss-2: #00a888;
   --ss-3: #9887ef;
@@ -39,6 +40,7 @@
     --warn: #a36b00;
     --series-1: #257de0;
     --grid: #e3e6ea;
+    --map-empty: #e4e7eb;
     --ss-1: #c9520f;
     --ss-2: #008f73;
     --ss-3: #6a4ce2;
@@ -138,6 +140,7 @@ h1, h2, h3, p { margin: 0; }
 .icon-btn.back { margin-left: -10px; }
 .chip { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text); }
 .chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.chip.warn { border-color: var(--warn); color: var(--warn); }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chips.scroll { flex-wrap: nowrap; overflow-x: auto; margin: 0 -16px; padding: 0 16px; scrollbar-width: none; }
 .chips.scroll::-webkit-scrollbar { display: none; }
@@ -200,7 +203,8 @@ textarea.input { resize: none; overflow: hidden; display: block; }
 @media (min-width: 560px) { .ex-images { flex-direction: row; flex-wrap: wrap; } .ex-images figure { flex: 1 1 45%; } .ex-images p { flex-basis: 100%; } }
 .ex-title { flex: 1; min-width: 0; text-align: left; font-size: 17px; font-weight: 700; color: var(--accent); }
 .ex-head .icon-btn { width: 40px; height: 40px; margin: -6px -4px -6px 0; }
-.ex-meta { display: flex; align-items: center; gap: 8px; padding: 0 4px; }
+.ex-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 0 4px; }
+.ex-goal { padding: 0 4px; color: var(--text); font-weight: 600; }
 .ex-notes { width: 100%; border: 0; background: transparent; padding: 2px 4px; font-size: 14px; color: var(--muted); resize: none; overflow: hidden; display: block; }
 .ex-notes:focus { outline: none; color: var(--text); }
 .set-grid { display: grid; column-gap: 6px; row-gap: 6px; align-items: center; }
@@ -252,5 +256,32 @@ textarea.input { resize: none; overflow: hidden; display: block; }
 .chart .bar { fill: var(--series-1); }
 .chart .bar.dim { opacity: 0.45; }
 .chart .cross { stroke: var(--muted); stroke-width: 1; }
+.chart .goal { stroke: var(--muted); stroke-width: 1.5; }
+
+/* --- Calendario ----------------------------------------------------- */
+.cal { display: flex; flex-direction: column; gap: 4px; }
+.cal-months { display: grid; font-size: 11px; color: var(--muted); height: 14px; }
+.cal-months span { white-space: nowrap; }
+.cal-grid { display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; }
+.cal-cell { display: block; aspect-ratio: 1; border-radius: 2px; background: var(--map-empty); min-width: 0; }
+.cal-cell.future { background: transparent; }
+.cal-cell.l1 { background: color-mix(in srgb, var(--series-1) 40%, var(--map-empty)); }
+.cal-cell.l2 { background: color-mix(in srgb, var(--series-1) 70%, var(--map-empty)); }
+.cal-cell.l3 { background: var(--series-1); }
+.cal-legend { display: inline-flex; gap: 2px; }
+.cal-legend .cal-cell { width: 11px; }
+
+/* --- Músculos -------------------------------------------------------- */
+.muscle-layout { display: flex; gap: 12px; align-items: flex-start; }
+.muscle-map { display: flex; gap: 4px; flex: none; width: 132px; }
+.muscle-fig { margin: 0; flex: 1; text-align: center; font-size: 11px; color: var(--muted); }
+.muscle-fig svg { display: block; width: 100%; height: auto; }
+.body-base { fill: var(--surface-2); stroke: var(--border); stroke-width: 1; }
+.muscle-fig svg > rect, .muscle-fig svg > ellipse, .muscle-fig svg > polygon { stroke: var(--surface); stroke-width: 1; }
+.muscle-bars { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.muscle-row { display: grid; grid-template-columns: minmax(0, 84px) 1fr 30px; gap: 6px; align-items: center; font-size: 13px; }
+.muscle-row .track { height: 10px; border-radius: 0 4px 4px 0; background: transparent; display: block; }
+.muscle-row .fill { display: block; height: 100%; min-width: 2px; border-radius: 0 4px 4px 0; background: var(--series-1); }
+.muscle-row .num { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
 .chart-tip { position: absolute; top: 0; transform: translateX(-50%); pointer-events: none; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; font-size: 12px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); }
 .chart-tip b { font-size: 14px; display: block; font-variant-numeric: tabular-nums; }

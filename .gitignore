@@ -8,3 +8,4 @@ mfh-import.json
 mfh-backup-*.json
 hevy-dump/
 tests/e2e/shots/
+fitness-copia-*.json

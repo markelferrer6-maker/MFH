@@ -19,6 +19,7 @@ import { goBack, navigate } from '../lib/router';
 import { BarChart, LineChart } from '../ui/charts';
 import { Sheet, actionSheet, confirmDialog } from '../ui/dialogs';
 import { ExerciseImagesCompact, ExerciseThumbImage } from '../ui/ExerciseHelp';
+import { BodyWeightCard, CalendarCard, MuscleCard } from './ProgressWidgets';
 import { ExerciseForm, ExercisePicker, fold } from '../ui/ExercisePicker';
 import { Icon } from '../ui/Icon';
 import { Page } from '../ui/layout';
@@ -44,6 +45,7 @@ export function Progress() {
   const [creating, setCreating] = useState(false);
 
   const weeks = useMemo(() => weeklyCounts(done ?? [], 12), [done]);
+  const exerciseMap = useMemo(() => new Map((exercises ?? []).map((e) => [e.id, e])), [exercises]);
   const rows = useMemo(() => {
     if (!done || !exercises) return [];
     return exercises
@@ -93,6 +95,10 @@ export function Progress() {
           }))}
         />
       </div>
+
+      <CalendarCard done={done} />
+      <MuscleCard done={done} exercises={exerciseMap} />
+      <BodyWeightCard />
 
       <h2 className="section-title">Ejercicios</h2>
       <label className="row">
