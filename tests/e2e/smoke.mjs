@@ -44,7 +44,7 @@ function sampleBackup() {
     version: 1,
     exportedAt: new Date().toISOString(),
     exercises: [
-      { id: 'press', name: 'Press de Banca (Barra)', muscle: 'Pecho', type: 'weight_reps' },
+      { id: 'press', name: 'Press de Banca (Barra)', muscle: 'Pecho', type: 'weight_reps', hevyTemplateId: '79D0BB3A' },
       { id: 'fondos', name: 'Fondos', muscle: 'Tríceps', type: 'reps' },
       { id: 'jalon', name: 'Jalón al Pecho (Cable)', muscle: 'Dorsales', type: 'weight_reps' },
       { id: 'curl', name: 'Curl de Bíceps (Mancuerna)', muscle: 'Bíceps', type: 'weight_reps' },
@@ -160,6 +160,22 @@ try {
   assert(/\d/.test(prevText), `muestra la referencia de la última vez (${prevText})`);
   await shot(page, 'entreno-inicio');
 
+  // Fotos del ejercicio: miniatura en la tarjeta y vista grande al tocarla.
+  if (firstExercise.hevyTemplateId) {
+    const help = first.getByRole('button', { name: /Ver cómo se hace/ });
+    if (await help.count()) {
+      await help.click();
+      const photos = page.getByRole('dialog').locator('.ex-images img');
+      await photos.first().waitFor();
+      const loaded = await photos.evaluateAll(async (imgs) => {
+        await Promise.all(imgs.map((i) => i.decode().catch(() => {})));
+        return imgs.filter((i) => i.naturalWidth > 0).length;
+      });
+      assert(loaded === 2, 'las dos fotos del ejercicio (inicio y final) cargan');
+      await page.getByRole('button', { name: 'Cerrar' }).click();
+    }
+  }
+
   // Marcar la primera serie sin escribir: se rellena con lo sugerido y arranca el descanso.
   const checks = first.getByRole('button', { name: /Marcar hecha la serie/ });
   const inputsBefore = await first.locator('.set-input').first().inputValue();
@@ -218,6 +234,7 @@ try {
   await page.locator('.list-item', { hasText: firstExercise.name }).first().click();
   await page.locator('.chart svg .line').waitFor();
   assert(true, `la ficha de «${firstExercise.name}» dibuja su gráfica`);
+  await page.locator('.chart svg').scrollIntoViewIfNeeded();
   const box = await page.locator('.chart svg').boundingBox();
   await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.5);
   await page.locator('.chart-tip').waitFor();

@@ -13,6 +13,7 @@ import { fmt1, fmtDate, fmtDuration, fmtInt, fmtMonth, fmtTime, setSummary, toLo
 import { useDoneWorkouts, useExerciseMap, useSettings } from '../lib/hooks';
 import { goBack, navigate } from '../lib/router';
 import { actionSheet, confirmDialog } from '../ui/dialogs';
+import { ExerciseThumb } from '../ui/ExerciseHelp';
 import { ExerciseList, supersetInfo } from '../ui/ExerciseList';
 import { Icon } from '../ui/Icon';
 import { NumberInput } from '../ui/inputs';
@@ -266,14 +267,16 @@ export function WorkoutDetail({ id }: { id: string }) {
                 {ss.label}
               </div>
             )}
-            <button
-              className="ex-title ellipsis"
-              style={{ paddingLeft: 4 }}
-              disabled={!ex}
-              onClick={() => navigate(`/exercise/${e.exerciseId}`)}
-            >
-              {ex?.name ?? 'Ejercicio eliminado'}
-            </button>
+            <div className="ex-head">
+              <ExerciseThumb exercise={ex} />
+              <button
+                className="ex-title ellipsis"
+                disabled={!ex}
+                onClick={() => navigate(`/exercise/${e.exerciseId}`)}
+              >
+                {ex?.name ?? 'Ejercicio eliminado'}
+              </button>
+            </div>
             {e.notes && <p className="small muted" style={{ padding: '0 4px', whiteSpace: 'pre-wrap' }}>{e.notes}</p>}
             <div style={{ padding: '0 4px' }}>
               {e.sets.map((s, j) => (

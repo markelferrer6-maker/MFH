@@ -57,6 +57,7 @@ type Request =
       danger: boolean;
       resolve: (ok: boolean) => void;
     }
+  | { kind: 'content'; title: string; content: ReactNode; resolve: () => void }
   | { kind: 'actions'; title: string; actions: Action[]; grid: boolean; resolve: (id: string | undefined) => void }
   | {
       kind: 'prompt';
@@ -116,6 +117,11 @@ export function actionSheet<T extends string>(opts: {
       resolve: resolve as (id: string | undefined) => void,
     }),
   );
+}
+
+/** Abre una hoja con contenido libre (por ejemplo, las fotos de un ejercicio). */
+export function openSheet(title: string, content: ReactNode): Promise<void> {
+  return new Promise((resolve) => push({ kind: 'content', title, content, resolve }));
 }
 
 export function promptDialog(opts: {
@@ -181,6 +187,13 @@ export function DialogHost() {
         <button className="btn block" onClick={() => finish(false)}>
           {req.cancelLabel}
         </button>
+      </Sheet>
+    );
+  }
+  if (req.kind === 'content') {
+    return (
+      <Sheet title={req.title} onClose={() => finish(undefined)}>
+        {req.content}
       </Sheet>
     );
   }

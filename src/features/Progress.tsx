@@ -13,10 +13,12 @@ import {
   type RecordKind,
 } from '../domain/stats';
 import { clock, fmt1, fmtDate, fmtDateShort, relDay, setSummary } from '../lib/format';
+import { imagesFor } from '../lib/exerciseImages';
 import { useDoneWorkouts, useExerciseMap } from '../lib/hooks';
 import { goBack, navigate } from '../lib/router';
 import { BarChart, LineChart } from '../ui/charts';
 import { Sheet, actionSheet, confirmDialog } from '../ui/dialogs';
+import { ExerciseImagesCompact, ExerciseThumbImage } from '../ui/ExerciseHelp';
 import { ExerciseForm, fold } from '../ui/ExercisePicker';
 import { Icon } from '../ui/Icon';
 import { Page } from '../ui/layout';
@@ -107,6 +109,7 @@ export function Progress() {
       <div className="list">
         {shown.map(({ exercise, count, last, best }) => (
           <button className="list-item" key={exercise.id} onClick={() => navigate(`/exercise/${exercise.id}`)}>
+            <ExerciseThumbImage exercise={exercise} />
             <span className="grow">
               <span className="title ellipsis" style={{ display: 'block' }}>
                 {exercise.name}
@@ -207,6 +210,13 @@ export function ExerciseDetail({ id }: { id: string }) {
       <p className="muted">
         {exercise.muscle} · {sessions.length} {sessions.length === 1 ? 'sesión' : 'sesiones'}
       </p>
+
+      {imagesFor(exercise) && (
+        <div className="card stack">
+          <h2>Cómo se hace</h2>
+          <ExerciseImagesCompact exercise={exercise} />
+        </div>
+      )}
 
       {points.length > 0 ? (
         <div className="card stack">

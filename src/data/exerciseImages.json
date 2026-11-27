@@ -1,0 +1,221 @@
+{
+  "01A35BF9": {
+    "id": "EZ-Bar_Curl"
+  },
+  "022DF610": {
+    "id": "Sit-Up"
+  },
+  "0393F233": {
+    "id": "Seated_Cable_Rows"
+  },
+  "059E835D": {
+    "id": "Leverage_Shoulder_Press"
+  },
+  "062AB91A": {
+    "id": "Seated_Calf_Raise"
+  },
+  "07B38369": {
+    "id": "Incline_Dumbbell_Press"
+  },
+  "08590920": {
+    "id": "Hanging_Leg_Raise",
+    "approx": true
+  },
+  "0EB695C9": {
+    "id": "Leg_Press",
+    "approx": true
+  },
+  "11A123F3": {
+    "id": "Seated_Leg_Curl"
+  },
+  "12017185": {
+    "id": "Dumbbell_Flyes"
+  },
+  "1B2B1E7C": {
+    "id": "Pullups"
+  },
+  "1DF4A847": {
+    "id": "Leverage_Iso_Row",
+    "approx": true
+  },
+  "21310F5F": {
+    "id": "Triceps_Pushdown",
+    "approx": true
+  },
+  "218DA87C": {
+    "id": "Superman"
+  },
+  "234BC743": {
+    "id": "Dip_Machine",
+    "approx": true
+  },
+  "23E92538": {
+    "id": "Bent_Over_Two-Dumbbell_Row"
+  },
+  "243710DE": {
+    "id": "Running_Treadmill"
+  },
+  "24706DCD": {
+    "id": "Leverage_Chest_Press"
+  },
+  "2EE45F81": {
+    "id": "One_Arm_Lat_Pulldown"
+  },
+  "3601968B": {
+    "id": "Dumbbell_Bench_Press"
+  },
+  "3765684D": {
+    "id": "Standing_Dumbbell_Triceps_Extension"
+  },
+  "37FCC2BB": {
+    "id": "Dumbbell_Bicep_Curl"
+  },
+  "392887AA": {
+    "id": "Pushups"
+  },
+  "3D0C7C75": {
+    "id": "Goblet_Squat"
+  },
+  "422B08F1": {
+    "id": "Side_Lateral_Raise"
+  },
+  "50DFDFAB": {
+    "id": "Barbell_Incline_Bench_Press_-_Medium_Grip"
+  },
+  "5122E7D9": {
+    "id": "Dip_Machine"
+  },
+  "55E6546F": {
+    "id": "Bent_Over_Barbell_Row"
+  },
+  "5DA40761": {
+    "id": "Standing_Dumbbell_Calf_Raise",
+    "approx": true
+  },
+  "6120CAAB": {
+    "id": "Standing_Leg_Curl"
+  },
+  "68F8A292": {
+    "id": "Lying_Dumbbell_Tricep_Extension"
+  },
+  "6A6C31A5": {
+    "id": "Wide-Grip_Lat_Pulldown"
+  },
+  "6A8D3193": {
+    "id": "Lying_T-Bar_Row"
+  },
+  "729237D1": {
+    "id": "Weighted_Pull_Ups"
+  },
+  "72CFFAD5": {
+    "id": "Stiff-Legged_Dumbbell_Deadlift"
+  },
+  "75A4F6C4": {
+    "id": "Leg_Extensions"
+  },
+  "79D0BB3A": {
+    "id": "Barbell_Bench_Press_-_Medium_Grip"
+  },
+  "7E3BC8B6": {
+    "id": "Hammer_Curls"
+  },
+  "7EB3F7C3": {
+    "id": "Machine_Bench_Press"
+  },
+  "8347DFD1": {
+    "id": "Dumbbell_One-Arm_Triceps_Extension"
+  },
+  "878CD1D0": {
+    "id": "Dumbbell_Shoulder_Press"
+  },
+  "91FAFBA3": {
+    "id": "Leverage_Iso_Row",
+    "approx": true
+  },
+  "9237BAD1": {
+    "id": "Machine_Shoulder_Military_Press"
+  },
+  "93A552C6": {
+    "id": "Triceps_Pushdown"
+  },
+  "94B7239B": {
+    "id": "Triceps_Pushdown_-_Rope_Attachment"
+  },
+  "9930DF71": {
+    "id": "Seated_Dumbbell_Press"
+  },
+  "9DCE2D64": {
+    "id": "Butterfly"
+  },
+  "A127DA73": {
+    "id": "Goblet_Squat"
+  },
+  "AA1EB7D8": {
+    "id": "Leverage_Iso_Row"
+  },
+  "ABEC557F": {
+    "id": "Dumbbell_Shrug"
+  },
+  "AC1BB830": {
+    "id": "Trail_Running_Walking"
+  },
+  "B537D09F": {
+    "id": "Dumbbell_Lunges"
+  },
+  "B5D3A742": {
+    "id": "Split_Squat_with_Dumbbells"
+  },
+  "B8127AD1": {
+    "id": "Lying_Leg_Curls"
+  },
+  "C6272009": {
+    "id": "Barbell_Deadlift"
+  },
+  "C6C9B8A0": {
+    "id": "Plank"
+  },
+  "C7973E0E": {
+    "id": "Leg_Press"
+  },
+  "CDA23948": {
+    "id": "Butt_Lift_Bridge"
+  },
+  "D1CD146F": {
+    "id": "Single_Leg_Glute_Bridge",
+    "approx": true
+  },
+  "D3E2AB55": {
+    "id": "Incline_Dumbbell_Flyes"
+  },
+  "D57C2EC7": {
+    "id": "Barbell_Hip_Thrust"
+  },
+  "D5D0354D": {
+    "id": "Side_Lateral_Raise",
+    "approx": true
+  },
+  "D8911FC4": {
+    "id": "Dead_Bug"
+  },
+  "DCF3B31B": {
+    "id": "Crunches"
+  },
+  "E3EDA509": {
+    "id": "Side_Bridge"
+  },
+  "F1D60854": {
+    "id": "Seated_Cable_Rows"
+  },
+  "F1E57334": {
+    "id": "One-Arm_Dumbbell_Row"
+  },
+  "F4B4C6EE": {
+    "id": "Thigh_Abductor"
+  },
+  "F8356514": {
+    "id": "Hanging_Leg_Raise"
+  },
+  "FBF92739": {
+    "id": "Leverage_Incline_Chest_Press"
+  }
+}

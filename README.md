@@ -6,6 +6,7 @@ App de entrenamiento personal: rutinas, registro de series y progreso. Es una we
 
 - **Rutinas** con series planificadas, descansos por ejercicio, notas y superseries.
 - **Entreno en curso**: cada serie muestra lo que hiciste la última vez y viene sugerida con esos valores; un toque la marca como hecha y arranca el descanso.
+- **Fotos de cada ejercicio** (posición inicial y final) al tocar su miniatura.
 - **Historial** editable de todos los entrenos.
 - **Progreso** por ejercicio: peso máximo, 1RM estimado (fórmula de Epley), volumen y récords personales.
 - **Copia de seguridad** en un archivo JSON que exportas e importas cuando quieras.
@@ -64,6 +65,16 @@ npm run build && npm run e2e
 | `src/ui` | Componentes compartidos: tarjeta de ejercicio, diálogos, gráficas |
 | `src/import` | Conversor de datos de Hevy |
 | `tests` | Pruebas unitarias y de extremo a extremo |
+
+### Fotos de los ejercicios
+
+Las fotos de `public/ex/` vienen de [free-exercise-db](https://github.com/yuhonas/free-exercise-db), publicado en el dominio público (Unlicense). `src/data/exerciseImages.json` relaciona cada plantilla de ejercicio de Hevy con su carpeta de fotos; `"approx": true` marca las que muestran el mismo movimiento con otro material. Para añadir o cambiar fotos, edita ese archivo y ejecuta:
+
+```bash
+python3 scripts/fetch-exercise-images.py
+```
+
+Los ejercicios creados a mano en la app no tienen foto.
 
 ### Importar desde Hevy
 

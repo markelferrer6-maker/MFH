@@ -12,6 +12,7 @@ import {
 import { nextSet, pickValues, toggleSet } from '../domain/workout';
 import { clock, setSummary } from '../lib/format';
 import { actionSheet } from './dialogs';
+import { ExerciseThumb } from './ExerciseHelp';
 import { Icon } from './Icon';
 import { AutoTextarea, NumberInput } from './inputs';
 
@@ -160,6 +161,7 @@ export function ExerciseCard({
         </div>
       )}
       <div className="ex-head">
+        <ExerciseThumb exercise={exercise} />
         <button className="ex-title ellipsis" onClick={onTitle} disabled={!onTitle || !exercise}>
           {name}
         </button>

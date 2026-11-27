@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { db } from '../db/db';
 import { MUSCLES, TYPE_LABELS, uid, type Exercise, type ExerciseType } from '../db/schema';
 import { Sheet } from './dialogs';
+import { ExerciseThumbImage } from './ExerciseHelp';
 import { Icon } from './Icon';
 
 /** Quita acentos y mayúsculas para buscar "biceps" y encontrar "Bíceps". */
@@ -128,6 +129,7 @@ export function ExercisePicker({
       <div className="list">
         {shown.map((e) => (
           <button key={e.id} className="list-item" onClick={() => onPick(e.id)}>
+            <ExerciseThumbImage exercise={e} />
             <span className="grow">
               <span className="title ellipsis" style={{ display: 'block' }}>
                 {e.name}
