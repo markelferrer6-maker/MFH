@@ -39,6 +39,26 @@ export function ExerciseImagesCompact({ exercise }: { exercise: Exercise }) {
   );
 }
 
+/** Tira de fotos de varios ejercicios (decorativa): da una idea de qué contiene una rutina. */
+export function ThumbStrip({ exercises, max = 5 }: { exercises: (Exercise | undefined)[]; max?: number }) {
+  const photos = exercises.flatMap((e) => {
+    const images = imagesFor(e);
+    return images ? [images.start] : [];
+  });
+  const unique = [...new Set(photos)];
+  if (unique.length === 0) return null;
+  const shown = unique.slice(0, max);
+  const rest = exercises.length - shown.length;
+  return (
+    <div className="thumbs" aria-hidden="true">
+      {shown.map((src) => (
+        <img key={src} src={src} width={52} height={52} loading="lazy" alt="" />
+      ))}
+      {rest > 0 && <span className="more">+{rest}</span>}
+    </div>
+  );
+}
+
 /** Miniatura decorativa para listas (la fila entera ya es un botón). */
 export function ExerciseThumbImage({
   exercise,

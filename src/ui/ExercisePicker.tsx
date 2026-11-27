@@ -120,8 +120,8 @@ export function ExercisePicker({
 
   return (
     <Sheet title={title} onClose={onClose} full>
-      <label className="row">
-        <Icon name="search" />
+      <label className="search">
+        <Icon name="search" size={20} />
         <input
           className="input"
           type="search"

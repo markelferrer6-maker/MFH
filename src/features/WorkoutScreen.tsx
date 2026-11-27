@@ -123,8 +123,8 @@ export function WorkoutScreen() {
     const choice = await actionSheet({
       title: workout.name,
       actions: [
-        { id: 'rename', label: 'Cambiar nombre' },
-        { id: 'discard', label: 'Descartar entreno', danger: true },
+        { id: 'rename', label: 'Cambiar nombre', icon: 'edit' },
+        { id: 'discard', label: 'Descartar entreno', icon: 'trash', danger: true },
       ],
     });
     if (choice === 'rename') {
@@ -162,15 +162,19 @@ export function WorkoutScreen() {
           </button>
         </>
       }
+      below={
+        <div className="workout-progress" aria-label={`${doneCount} de ${total} series hechas`}>
+          <Icon name="timer" size={16} />
+          <b>{clock((now - Date.parse(workout.startedAt)) / 1000)}</b>
+          <span className="bar" aria-hidden="true">
+            <span style={{ width: `${total > 0 ? (doneCount / total) * 100 : 0}%` }} />
+          </span>
+          <span>
+            {doneCount} de {total} series
+          </span>
+        </div>
+      }
     >
-      <div className="row small muted" style={{ fontVariantNumeric: 'tabular-nums' }}>
-        <Icon name="timer" size={16} />
-        <span>{clock((now - Date.parse(workout.startedAt)) / 1000)}</span>
-        <span>·</span>
-        <span>
-          {doneCount} de {total} series
-        </span>
-      </div>
       <ExerciseList
         items={workout.exercises}
         mode="active"
@@ -180,7 +184,7 @@ export function WorkoutScreen() {
         onChange={(items: WorkoutExercise[]) => update({ ...current.current!, exercises: items })}
         onSetDone={onSetDone}
       />
-      <button className="btn primary block" onClick={finish}>
+      <button className="btn primary block lg" onClick={finish}>
         Terminar entreno
       </button>
     </Page>

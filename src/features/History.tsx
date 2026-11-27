@@ -19,6 +19,9 @@ import { Icon } from '../ui/Icon';
 import { NumberInput } from '../ui/inputs';
 import { Page } from '../ui/layout';
 
+const weekdayFmt = new Intl.DateTimeFormat('es-ES', { weekday: 'short' });
+const weekdayShort = (iso: string): string => weekdayFmt.format(new Date(iso)).replace('.', '');
+
 function summaryLine(w: Workout): string {
   const parts = [fmtDuration(workoutDurationSec(w)), `${workoutSetCount(w)} series`];
   const vol = workoutVolume(w);
@@ -42,7 +45,14 @@ export function History() {
   if (!done) return <Page title="Historial">{null}</Page>;
   return (
     <Page title="Historial">
-      {done.length === 0 && <div className="empty">Aquí aparecerán tus entrenos cuando termines el primero.</div>}
+      {done.length === 0 && (
+        <div className="empty">
+          <span className="empty-icon">
+            <Icon name="history" size={26} />
+          </span>
+          Aquí aparecerán tus entrenos cuando termines el primero.
+        </div>
+      )}
       {groups.map((g) => (
         <div className="stack" key={g.month}>
           <h2 className="section-title">
@@ -50,14 +60,21 @@ export function History() {
           </h2>
           <div className="list">
             {g.items.map((w) => (
-              <button className="list-item" key={w.id} onClick={() => navigate(`/history/${w.id}`)}>
+              <button
+                className="list-item"
+                key={w.id}
+                onClick={() => navigate(`/history/${w.id}`)}
+                aria-label={`${w.name}, ${fmtDate(w.startedAt)}, ${summaryLine(w)}`}
+              >
+                <span className="day-badge" aria-hidden="true">
+                  <b>{new Date(w.startedAt).getDate()}</b>
+                  <span>{weekdayShort(w.startedAt)}</span>
+                </span>
                 <span className="grow">
                   <span className="title ellipsis" style={{ display: 'block' }}>
                     {w.name}
                   </span>
-                  <span className="small muted">
-                    {fmtDate(w.startedAt)} · {summaryLine(w)}
-                  </span>
+                  <span className="small muted">{summaryLine(w)}</span>
                 </span>
                 <span className="muted">
                   <Icon name="chevron" size={18} />
@@ -179,8 +196,8 @@ export function WorkoutDetail({ id }: { id: string }) {
     const choice = await actionSheet({
       title: workout.name,
       actions: [
-        { id: 'edit', label: 'Editar' },
-        { id: 'delete', label: 'Eliminar entreno', danger: true },
+        { id: 'edit', label: 'Editar', icon: 'edit' },
+        { id: 'delete', label: 'Eliminar entreno', icon: 'trash', danger: true },
       ],
     });
     if (choice === 'edit') setDraft(workout);
@@ -217,14 +234,23 @@ export function WorkoutDetail({ id }: { id: string }) {
       </p>
       <div className="stats">
         <div className="stat">
+          <span className="ico">
+            <Icon name="timer" size={18} />
+          </span>
           <div className="value">{fmtDuration(workoutDurationSec(workout))}</div>
           <div className="label">Duración</div>
         </div>
         <div className="stat">
+          <span className="ico">
+            <Icon name="check" size={18} />
+          </span>
           <div className="value">{workoutSetCount(workout)}</div>
           <div className="label">Series</div>
         </div>
         <div className="stat">
+          <span className="ico">
+            <Icon name="dumbbell" size={18} />
+          </span>
           <div className="value">{volume > 0 ? `${fmtInt(volume)} kg` : '—'}</div>
           <div className="label">Volumen</div>
         </div>

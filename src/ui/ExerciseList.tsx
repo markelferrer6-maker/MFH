@@ -151,17 +151,18 @@ export function ExerciseList({
     const choice = await actionSheet({
       title: name,
       actions: [
-        i > 0 && { id: 'up', label: 'Subir' },
-        i < items.length - 1 && { id: 'down', label: 'Bajar' },
+        i > 0 && { id: 'up', label: 'Subir', icon: 'arrowUp' },
+        i < items.length - 1 && { id: 'down', label: 'Bajar', icon: 'arrowDown' },
         i < items.length - 1 && {
           id: 'superset',
+          icon: 'link',
           label: linkedNext ? 'Separar del siguiente' : 'Hacer superserie con el siguiente',
         },
-        isWeight && mode !== 'edit' && { id: 'warmup', label: 'Generar series de calentamiento' },
-        isWeight && { id: 'plates', label: 'Calculadora de discos' },
-        { id: 'replace', label: 'Sustituir por otro ejercicio' },
-        exercises.has(item.exerciseId) && { id: 'progress', label: 'Ver progreso' },
-        { id: 'remove', label: 'Quitar ejercicio', danger: true },
+        isWeight && mode !== 'edit' && { id: 'warmup', label: 'Generar series de calentamiento', icon: 'flame' },
+        isWeight && { id: 'plates', label: 'Calculadora de discos', icon: 'dumbbell' },
+        { id: 'replace', label: 'Sustituir por otro ejercicio', icon: 'swap' },
+        exercises.has(item.exerciseId) && { id: 'progress', label: 'Ver progreso', icon: 'trend' },
+        { id: 'remove', label: 'Quitar ejercicio', icon: 'trash', danger: true },
       ],
     });
     if (choice === 'up') move(i, -1);

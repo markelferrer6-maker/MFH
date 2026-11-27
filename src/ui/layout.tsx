@@ -7,29 +7,41 @@ import { Icon, type IconName } from './Icon';
 
 export function Page({
   title,
+  eyebrow,
   back,
   onBack,
   right,
+  below,
   children,
 }: {
   title: ReactNode;
+  /** Texto pequeño sobre el título (por ejemplo, la fecha). Solo en pantallas principales. */
+  eyebrow?: ReactNode;
   /** Ruta a la que volver si no hay historial dentro de la app. Si se indica, se muestra la flecha. */
   back?: string;
   /** Sustituye el comportamiento de la flecha (por ejemplo, para avisar de cambios sin guardar). */
   onBack?: () => void;
   right?: ReactNode;
+  /** Contenido fijo bajo el título (por ejemplo, el progreso del entreno). */
+  below?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <>
-      <header className={`topbar${back ? ' sub' : ''}`}>
-        {back && (
-          <button className="icon-btn back" onClick={onBack ?? (() => goBack(back))} aria-label="Volver">
-            <Icon name="back" />
-          </button>
-        )}
-        <h1>{title}</h1>
-        <div className="topbar-right">{right}</div>
+      <header className={`topbar${back ? ' sub' : ' large'}`}>
+        <div className="topbar-row">
+          {back && (
+            <button className="icon-btn back" onClick={onBack ?? (() => goBack(back))} aria-label="Volver">
+              <Icon name="back" />
+            </button>
+          )}
+          <div className="topbar-title">
+            {eyebrow && <div className="eyebrow">{eyebrow}</div>}
+            <h1>{title}</h1>
+          </div>
+          <div className="topbar-right">{right}</div>
+        </div>
+        {below}
       </header>
       <main className="content">{children}</main>
     </>
@@ -53,13 +65,17 @@ function TabBar({ current }: { current: string | undefined }) {
           aria-current={current === t.key ? 'page' : undefined}
           onClick={() => navigate(t.path, { replace: true })}
         >
-          <Icon name={t.icon} />
+          <span className="tab-icon">
+            <Icon name={t.icon} />
+          </span>
           {t.label}
         </button>
       ))}
     </nav>
   );
 }
+
+const RING = 2 * Math.PI * 21;
 
 function RestBar() {
   const rest = useSyncExternalStore(restTimer.subscribe, restTimer.get);
@@ -76,10 +92,16 @@ function RestBar() {
   }, [finished]);
 
   if (!rest) return null;
-  const pct = finished ? 100 : Math.min(100, Math.max(0, (1 - remaining / rest.total) * 100));
+  const done = finished ? 1 : Math.min(1, Math.max(0, 1 - remaining / rest.total));
   return (
     <div className={`floatbar restbar${finished ? ' finished' : ''}`} role="timer" aria-label="Descanso">
-      <div className="time">{finished ? '¡Ya!' : clock(Math.ceil(remaining))}</div>
+      <div className="ring">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <circle className="ring-track" cx="24" cy="24" r="21" />
+          <circle className="ring-value" cx="24" cy="24" r="21" strokeDasharray={RING} strokeDashoffset={RING * done} />
+        </svg>
+        <span className="time">{finished ? '¡Ya!' : clock(Math.ceil(remaining))}</span>
+      </div>
       <div className="grow">
         <div className="title">{finished ? 'Descanso terminado' : 'Descanso'}</div>
         <div className="small">{rest.label}</div>
@@ -97,7 +119,6 @@ function RestBar() {
       <button className="btn sm" onClick={() => restTimer.stop()}>
         {finished ? 'Cerrar' : 'Saltar'}
       </button>
-      <div className="progress" style={{ width: `${pct}%` }} />
     </div>
   );
 }
@@ -107,8 +128,8 @@ function ActiveBar() {
   const now = useNow(1000, Boolean(active));
   if (!active) return null;
   return (
-    <button className="floatbar" onClick={() => navigate('/workout')} style={{ textAlign: 'left' }}>
-      <Icon name="play" />
+    <button className="floatbar activebar" onClick={() => navigate('/workout')}>
+      <span className="live-dot" aria-hidden="true" />
       <span className="grow">
         <span className="title" style={{ display: 'block' }}>
           {active.name}

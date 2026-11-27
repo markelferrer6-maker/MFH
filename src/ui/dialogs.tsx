@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
-import { Icon } from './Icon';
+import { Icon, type IconName } from './Icon';
 
 /** Hoja inferior modal. */
 export function Sheet({
@@ -26,6 +26,7 @@ export function Sheet({
   return (
     <div className="sheet-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className={`sheet${full ? ' full' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
+        <div className="sheet-grab" aria-hidden="true" />
         <div className="sheet-head">
           <h2>{title}</h2>
           <button className="icon-btn" onClick={onClose} aria-label="Cerrar">
@@ -43,6 +44,7 @@ export function Sheet({
 export interface Action<T extends string = string> {
   id: T;
   label: string;
+  icon?: IconName;
   danger?: boolean;
   selected?: boolean;
 }
@@ -216,6 +218,11 @@ export function DialogHost() {
             className={`action${a.danger ? ' danger' : ''}${a.selected ? ' selected' : ''}`}
             onClick={() => finish(a.id)}
           >
+            {a.icon && (
+              <span className="action-icon">
+                <Icon name={a.icon} size={18} />
+              </span>
+            )}
             {a.label}
           </button>
         ))}

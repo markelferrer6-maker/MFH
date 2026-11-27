@@ -68,14 +68,23 @@ export function Progress() {
     <Page title="Progreso">
       <div className="stats">
         <div className="stat">
+          <span className="ico">
+            <Icon name="flame" size={18} />
+          </span>
           <div className="value">{thisWeek}</div>
           <div className="label">Esta semana</div>
         </div>
         <div className="stat">
+          <span className="ico">
+            <Icon name="calendar" size={18} />
+          </span>
           <div className="value">{last4}</div>
           <div className="label">Últimas 4 semanas</div>
         </div>
         <div className="stat">
+          <span className="ico">
+            <Icon name="trophy" size={18} />
+          </span>
           <div className="value">{done.length}</div>
           <div className="label">Entrenos en total</div>
         </div>
@@ -87,6 +96,7 @@ export function Progress() {
           title="Entrenos por semana, últimas 12 semanas"
           unitOne="entreno"
           unitMany="entrenos"
+          highlightLast
           bars={weeks.map((w, i) => ({
             key: String(w.start.getTime()),
             value: w.count,
@@ -101,8 +111,8 @@ export function Progress() {
       <BodyWeightCard />
 
       <h2 className="section-title">Ejercicios</h2>
-      <label className="row">
-        <Icon name="search" />
+      <label className="search">
+        <Icon name="search" size={20} />
         <input
           className="input"
           type="search"
@@ -179,8 +189,8 @@ export function ExerciseDetail({ id }: { id: string }) {
     const choice = await actionSheet({
       title: exercise.name,
       actions: [
-        { id: 'edit', label: 'Editar nombre, músculo o tipo' },
-        { id: 'delete', label: 'Eliminar ejercicio', danger: true },
+        { id: 'edit', label: 'Editar nombre, músculo o tipo', icon: 'edit' },
+        { id: 'delete', label: 'Eliminar ejercicio', icon: 'trash', danger: true },
       ],
     });
     if (choice === 'edit') setEditing(true);

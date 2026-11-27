@@ -10,7 +10,7 @@ const svg = readFileSync(new URL('../public/icon.svg', import.meta.url), 'utf8')
 // iOS y los iconos "maskable" recortan las esquinas ellos mismos: fondo cuadrado y dibujo más pequeño.
 const square = svg.replace('rx="112"', 'rx="0"');
 const padded = (scale) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#0b0d10"/>` +
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#08090a"/>` +
   `<g transform="translate(256 256) scale(${scale}) translate(-256 -256)">${square.replace(/<\/?svg[^>]*>/g, '')}</g></svg>`;
 
 const targets = [

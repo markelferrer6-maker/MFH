@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent, type RefObject } from 'react';
+import { useEffect, useId, useRef, useState, type PointerEvent, type RefObject } from 'react';
 import { fmt1 } from '../lib/format';
 
 function useWidth(): [RefObject<HTMLDivElement | null>, number] {
@@ -55,6 +55,7 @@ export function LineChart({
 }) {
   const [ref, width] = useWidth();
   const [hover, setHover] = useState<number | null>(null);
+  const gradient = useId();
   const fmt = (v: number) => `${fmt1(v)}${unit === 'kg' ? ' kg' : unit ? ` ${unit}` : ''}`;
 
   const values = [...points.map((p) => p.value), ...(goal !== undefined ? [goal] : [])];
@@ -118,7 +119,13 @@ export function LineChart({
               {last.label}
             </text>
           )}
-          {points.length > 1 && <path className="area" d={area} />}
+          <defs>
+            <linearGradient id={gradient} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="var(--series-line)" stopOpacity="0.28" />
+              <stop offset="1" stopColor="var(--series-line)" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          {points.length > 1 && <path d={area} fill={`url(#${gradient})`} />}
           <path className="line" d={path} />
           {points.length <= 12 &&
             points.slice(0, -1).map((p, i) => <circle key={i} className="dot" cx={x(p)} cy={y(p.value)} r={4} />)}
@@ -156,7 +163,20 @@ export interface Bar {
 }
 
 /** Columnas de una sola serie (por ejemplo, entrenos por semana). */
-export function BarChart({ bars, title, unitOne, unitMany }: { bars: Bar[]; title: string; unitOne: string; unitMany: string }) {
+export function BarChart({
+  bars,
+  title,
+  unitOne,
+  unitMany,
+  highlightLast = false,
+}: {
+  bars: Bar[];
+  title: string;
+  unitOne: string;
+  unitMany: string;
+  /** Destaca la última barra (el periodo en curso). */
+  highlightLast?: boolean;
+}) {
   const [ref, width] = useWidth();
   const [active, setActive] = useState<number | null>(null);
   const h = 150;
@@ -193,7 +213,12 @@ export function BarChart({ bars, title, unitOne, unitMany }: { bars: Bar[]; titl
             const d = `M${x0},${m.top + ih} V${yTop + r} Q${x0},${yTop} ${x0 + r},${yTop} H${x0 + bw - r} Q${x0 + bw},${yTop} ${x0 + bw},${yTop + r} V${m.top + ih} Z`;
             return (
               <g key={b.key}>
-                {b.value > 0 && <path className={`bar${active !== null && active !== i ? ' dim' : ''}`} d={d} />}
+                {b.value > 0 && (
+                  <path
+                    className={`bar${highlightLast && i === bars.length - 1 ? ' now' : ''}${active !== null && active !== i ? ' dim' : ''}`}
+                    d={d}
+                  />
+                )}
                 {b.axis && (
                   <text className="tick" x={cx} y={h - 4} textAnchor="middle">
                     {b.axis}

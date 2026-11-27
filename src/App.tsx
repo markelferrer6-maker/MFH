@@ -34,7 +34,7 @@ export function App() {
 
   // Espacio que hay que dejar libre al final de la página para las barras fijas.
   const bars = (rest ? 1 : 0) + (active && section !== 'workout' ? 1 : 0);
-  const bottomPad = (tabs ? 58 : 0) + bars * 76 + 24;
+  const bottomPad = (tabs ? 72 : 0) + bars * 84 + 34;
 
   return (
     <div className="app" style={{ '--bottom-pad': `${bottomPad}px` } as CSSProperties}>

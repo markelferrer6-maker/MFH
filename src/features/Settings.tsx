@@ -160,7 +160,7 @@ export function Settings() {
       </div>
 
       <h2 className="section-title">Entreno</h2>
-      <div className="card stack">
+      <div className="card group">
         <label className="switch-row">
           <span className="grow">
             Mantener la pantalla encendida
