@@ -77,4 +77,6 @@ El archivo resultante contiene datos personales. `.gitignore` lo excluye; no lo 
 
 ## Publicación
 
-`.github/workflows/deploy.yml` compila, pasa las pruebas y publica en GitHub Pages con cada cambio en `main`. En **Settings → Pages** hay que elegir **GitHub Actions** como origen. La app se sirve en `https://<usuario>.github.io/MFH/`; si cambia el nombre del repositorio, hay que cambiar `base` en `vite.config.ts`.
+`.github/workflows/deploy.yml` compila, pasa las pruebas y sube el resultado a la rama `gh-pages` con cada cambio en `main`. GitHub Pages sirve esa rama: en **Settings → Pages**, origen **Deploy from a branch**, rama `gh-pages` y carpeta `/ (root)`. La rama `gh-pages` solo contiene la app compilada; no se edita a mano.
+
+La app se sirve en `https://<usuario>.github.io/MFH/`; si cambia el nombre del repositorio, hay que cambiar `base` en `vite.config.ts`.
