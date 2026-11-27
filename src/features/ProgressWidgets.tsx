@@ -151,7 +151,7 @@ export function MuscleCard({ done, exercises }: { done: Workout[]; exercises: Ma
         <div className="empty">Sin entrenos en este periodo.</div>
       ) : (
         <div className="muscle-layout">
-          <MuscleMap values={values} />
+          <MuscleMap values={values} unit={period === '7d' ? 'series' : 'series por semana'} />
           <div className="muscle-bars">
             {rows.map((r) => (
               <div className="muscle-row" key={r.muscle}>

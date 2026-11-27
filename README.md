@@ -81,6 +81,10 @@ python3 scripts/fetch-exercise-images.py
 
 Los ejercicios creados a mano en la app no tienen foto.
 
+### Figura muscular
+
+La figura de "Series por músculo" usa los trazados de [react-native-body-highlighter](https://www.npmjs.com/package/react-native-body-highlighter) (MIT, © 2022 ELABBASSI Hicham; licencia en `src/data/bodyMap.LICENSE`). `scripts/build-body-map.mjs` los extrae del paquete a `src/data/bodyMap.json`; la librería no se instala.
+
 ### Catálogo de máquinas
 
 `src/data/catalog.json` es una lista de máquinas y ejercicios habituales de gimnasio (poleas, multipower, máquinas de discos, cardio) con nombre, grupo muscular, tipo y foto. Aparecen al añadir un ejercicio, debajo de los que ya tienes, y pasan a tu biblioteca la primera vez que eliges uno. Para ampliar el catálogo, añade una entrada con un `id` nuevo; si lleva `image`, vuelve a ejecutar el script de las fotos.

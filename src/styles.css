@@ -363,14 +363,20 @@ button.list-item:active { background: var(--surface-2); }
 .cal-legend .cal-cell { width: 11px; }
 
 /* --- Músculos -------------------------------------------------------- */
-.muscle-layout { display: flex; gap: 14px; align-items: flex-start; }
-.muscle-map { display: flex; gap: 4px; flex: none; width: 136px; }
-.muscle-fig { margin: 0; flex: 1; text-align: center; font-size: 11px; color: var(--muted); }
+.muscle-layout { display: flex; flex-direction: column; gap: 14px; }
+.muscle-map-wrap { display: flex; flex-direction: column; gap: 6px; }
+.muscle-map { display: flex; justify-content: center; gap: 12px; }
+.muscle-fig { margin: 0; flex: 0 1 158px; min-width: 0; text-align: center; font-size: 12px; font-weight: 600; color: var(--muted); }
 .muscle-fig svg { display: block; width: 100%; height: auto; }
-.body-base { fill: var(--surface-2); stroke: none; }
-.muscle-fig svg > rect, .muscle-fig svg > ellipse, .muscle-fig svg > polygon { stroke: var(--surface); stroke-width: 1; }
-.muscle-bars { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
-.muscle-row { display: grid; grid-template-columns: minmax(0, 84px) 1fr 30px; gap: 6px; align-items: center; font-size: 13px; }
+.body-outline { fill: var(--surface-2); stroke: var(--surface-3); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.muscle-fig g path { stroke: var(--surface); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.muscle-fig .body-part { fill: var(--surface-2); }
+.muscle-fig .muscle { cursor: pointer; transition: fill 0.2s; }
+.muscle-fig .muscle.selected path { stroke: var(--text); stroke-width: 2; }
+.muscle-hint { text-align: center; min-height: 18px; }
+.muscle-hint b { color: var(--text); }
+.muscle-bars { display: flex; flex-direction: column; gap: 7px; }
+.muscle-row { display: grid; grid-template-columns: minmax(0, 104px) 1fr 34px; gap: 8px; align-items: center; font-size: 14px; }
 .muscle-row .track { height: 10px; border-radius: 0 5px 5px 0; background: transparent; display: block; }
 .muscle-row .fill { display: block; height: 100%; min-width: 2px; border-radius: 0 5px 5px 0; background: var(--series-1); }
 .muscle-row .num { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }

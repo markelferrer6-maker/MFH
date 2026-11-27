@@ -1,84 +1,91 @@
-import type { ReactNode } from 'react';
+import { useState } from 'react';
+import body from '../data/bodyMap.json';
+import { fmt1 } from '../lib/format';
 
 /**
- * Figura esquemática (delante y detrás) con cada grupo muscular coloreado según su valor.
- * Es un apoyo visual: los números exactos van siempre en la lista de al lado.
+ * Figura humana (frente y espalda) con cada grupo muscular coloreado según su valor.
+ * Los trazados son de react-native-body-highlighter (MIT); ver src/data/bodyMap.LICENSE.
+ * Es un apoyo visual: los números exactos van siempre en la lista de barras.
  */
-type Shape =
-  | { muscle: string; kind: 'rect'; x: number; y: number; w: number; h: number; r?: number }
-  | { muscle: string; kind: 'ellipse'; cx: number; cy: number; rx: number; ry: number }
-  | { muscle: string; kind: 'poly'; points: string };
-
-const pair = (muscle: string, x: number, y: number, w: number, h: number, r = 4): Shape[] => [
-  { muscle, kind: 'rect', x, y, w, h, r },
-  { muscle, kind: 'rect', x: 100 - x - w, y, w, h, r },
-];
-const pairEllipse = (muscle: string, cx: number, cy: number, rx: number, ry: number): Shape[] => [
-  { muscle, kind: 'ellipse', cx, cy, rx, ry },
-  { muscle, kind: 'ellipse', cx: 100 - cx, cy, rx, ry },
-];
-
-const ARMS: Shape[] = [...pair('Antebrazos', 17.5, 77, 11, 30)];
-
-const FRONT: Shape[] = [
-  { muscle: 'Cuello', kind: 'rect', x: 45, y: 25, w: 10, h: 7, r: 2 },
-  ...pairEllipse('Hombros', 26, 40, 8, 7),
-  ...pair('Pecho', 33, 36, 16, 17),
-  ...pair('Bíceps', 17.5, 49, 11, 25),
-  ...ARMS,
-  { muscle: 'Abdominales', kind: 'rect', x: 39, y: 56, w: 22, h: 42, r: 5 },
-  ...pairEllipse('Abductores', 33, 108, 4, 9),
-  ...pair('Cuádriceps', 34, 118, 12, 44, 5),
-  ...pair('Aductores', 46.5, 118, 3, 26, 1.5),
-];
-
-const BACK: Shape[] = [
-  { muscle: 'Trapecios', kind: 'poly', points: '38,33 62,33 57,47 43,47' },
-  ...pairEllipse('Hombros', 26, 40, 8, 7),
-  { muscle: 'Espalda alta', kind: 'rect', x: 36, y: 48, w: 28, h: 12, r: 3 },
-  ...pair('Dorsales', 32, 62, 15, 26),
-  { muscle: 'Lumbares', kind: 'rect', x: 42, y: 90, w: 16, h: 13, r: 3 },
-  ...pair('Tríceps', 17.5, 49, 11, 25),
-  ...ARMS,
-  ...pairEllipse('Glúteos', 41, 111, 8, 9),
-  ...pair('Isquios', 34, 123, 12, 39, 5),
-  ...pair('Gemelos', 35, 166, 10, 27, 5),
-];
-
-/** Músculos que aparecen en la figura (el resto solo se ve en la lista). */
-export const MAPPED_MUSCLES = new Set([...FRONT, ...BACK].map((s) => s.muscle));
-
-function Silhouette() {
-  return (
-    <g className="body-base">
-      <circle cx="50" cy="15" r="10" />
-      <rect x="45" y="24" width="10" height="9" rx="2" />
-      <rect x="29" y="32" width="42" height="74" rx="11" />
-      <rect x="17" y="34" width="12" height="86" rx="6" />
-      <rect x="71" y="34" width="12" height="86" rx="6" />
-      <rect x="31" y="98" width="38" height="24" rx="9" />
-      <rect x="33" y="112" width="14" height="90" rx="7" />
-      <rect x="53" y="112" width="14" height="90" rx="7" />
-    </g>
-  );
+interface Region {
+  slug: string;
+  paths: string[];
 }
 
-function Figure({ shapes, values, max, label }: { shapes: Shape[]; values: Map<string, number>; max: number; label: string }) {
-  const fill = (muscle: string): string => {
-    const v = values.get(muscle) ?? 0;
+const DATA = body as {
+  viewBox: { front: string; back: string };
+  outline: { front: string; back: string };
+  front: Region[];
+  back: Region[];
+};
+
+/**
+ * Qué grupos musculares de la app pinta cada zona del dibujo. El dibujo no separa
+ * dorsales de espalda alta ni tiene abductores (glúteo medio y menor), así que esas
+ * zonas suman dos grupos.
+ */
+export const REGION_MUSCLES: Record<string, string[]> = {
+  chest: ['Pecho'],
+  abs: ['Abdominales'],
+  obliques: ['Abdominales'],
+  biceps: ['Bíceps'],
+  triceps: ['Tríceps'],
+  forearm: ['Antebrazos'],
+  deltoids: ['Hombros'],
+  trapezius: ['Trapecios'],
+  neck: ['Cuello'],
+  'upper-back': ['Dorsales', 'Espalda alta'],
+  'lower-back': ['Lumbares'],
+  gluteal: ['Glúteos', 'Abductores'],
+  hamstring: ['Isquios'],
+  quadriceps: ['Cuádriceps'],
+  calves: ['Gemelos'],
+  adductors: ['Aductores'],
+};
+
+/** Slugs presentes en el dibujo, para comprobar en las pruebas que la tabla es coherente. */
+export const BODY_SLUGS = new Set([...DATA.front, ...DATA.back].map((r) => r.slug));
+
+function Figure({
+  side,
+  regionValue,
+  max,
+  selected,
+  onSelect,
+  label,
+}: {
+  side: 'front' | 'back';
+  regionValue: (slug: string) => number;
+  max: number;
+  selected: string | null;
+  onSelect: (slug: string | null) => void;
+  label: string;
+}) {
+  const fill = (slug: string): string | undefined => {
+    if (!(slug in REGION_MUSCLES)) return undefined; // cabeza, manos, pies...: color de la silueta
+    const v = regionValue(slug);
     if (v <= 0 || max <= 0) return 'var(--map-empty)';
-    const pct = Math.round(25 + 75 * (v / max));
-    return `color-mix(in srgb, var(--series-1) ${pct}%, var(--map-empty))`;
+    const pct = Math.round(30 + 70 * (v / max));
+    return `color-mix(in srgb, var(--accent) ${pct}%, var(--map-empty))`;
   };
   return (
     <figure className="muscle-fig">
-      <svg viewBox="0 0 100 206" aria-hidden="true">
-        <Silhouette />
-        {shapes.map((s, i): ReactNode => {
-          const style = { fill: fill(s.muscle) };
-          if (s.kind === 'rect') return <rect key={i} x={s.x} y={s.y} width={s.w} height={s.h} rx={s.r ?? 4} style={style} />;
-          if (s.kind === 'ellipse') return <ellipse key={i} cx={s.cx} cy={s.cy} rx={s.rx} ry={s.ry} style={style} />;
-          return <polygon key={i} points={s.points} style={style} />;
+      <svg viewBox={DATA.viewBox[side]} aria-hidden="true">
+        <path className="body-outline" d={DATA.outline[side]} />
+        {DATA[side].map((region) => {
+          const muscle = region.slug in REGION_MUSCLES;
+          return (
+            <g
+              key={region.slug}
+              className={`${muscle ? 'muscle' : 'body-part'}${selected === region.slug ? ' selected' : ''}`}
+              style={{ fill: fill(region.slug) }}
+              onClick={muscle ? () => onSelect(selected === region.slug ? null : region.slug) : undefined}
+            >
+              {region.paths.map((d, i) => (
+                <path key={i} d={d} />
+              ))}
+            </g>
+          );
         })}
       </svg>
       <figcaption>{label}</figcaption>
@@ -86,12 +93,28 @@ function Figure({ shapes, values, max, label }: { shapes: Shape[]; values: Map<s
   );
 }
 
-export function MuscleMap({ values }: { values: Map<string, number> }) {
-  const max = Math.max(0, ...[...values].filter(([m]) => MAPPED_MUSCLES.has(m)).map(([, v]) => v));
+export function MuscleMap({ values, unit }: { values: Map<string, number>; unit: string }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const regionValue = (slug: string): number =>
+    (REGION_MUSCLES[slug] ?? []).reduce((sum, m) => sum + (values.get(m) ?? 0), 0);
+  const max = Math.max(0, ...Object.keys(REGION_MUSCLES).map(regionValue));
+  const names = selected ? REGION_MUSCLES[selected].join(' + ') : null;
+
   return (
-    <div className="muscle-map">
-      <Figure shapes={FRONT} values={values} max={max} label="Delante" />
-      <Figure shapes={BACK} values={values} max={max} label="Detrás" />
+    <div className="muscle-map-wrap">
+      <div className="muscle-map">
+        <Figure side="front" regionValue={regionValue} max={max} selected={selected} onSelect={setSelected} label="Delante" />
+        <Figure side="back" regionValue={regionValue} max={max} selected={selected} onSelect={setSelected} label="Detrás" />
+      </div>
+      <p className="small muted muscle-hint" role="status">
+        {selected && names ? (
+          <>
+            <b>{names}</b>: {fmt1(regionValue(selected))} {unit}
+          </>
+        ) : (
+          'Toca un músculo para ver sus series.'
+        )}
+      </p>
     </div>
   );
 }

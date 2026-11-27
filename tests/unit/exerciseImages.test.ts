@@ -26,6 +26,19 @@ describe('fotos de ejercicios', () => {
   });
 });
 
+describe('figura muscular', () => {
+  it('todas las zonas de la tabla existen en el dibujo', async () => {
+    const { BODY_SLUGS, REGION_MUSCLES } = await import('../../src/ui/MuscleMap');
+    for (const slug of Object.keys(REGION_MUSCLES)) expect(BODY_SLUGS.has(slug), slug).toBe(true);
+  });
+
+  it('cada grupo muscular con zona propia usa un nombre de la lista de músculos de la app', async () => {
+    const { REGION_MUSCLES } = await import('../../src/ui/MuscleMap');
+    const { MUSCLES } = await import('../../src/db/schema');
+    for (const names of Object.values(REGION_MUSCLES)) for (const n of names) expect(MUSCLES as readonly string[]).toContain(n);
+  });
+});
+
 describe('catálogo de máquinas', () => {
   it('tiene ids únicos, nombres únicos y tipos válidos', () => {
     expect(new Set(CATALOG.map((c) => c.id)).size).toBe(CATALOG.length);
