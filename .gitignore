@@ -1,0 +1,10 @@
+node_modules
+dist
+dev-dist
+*.local
+.DS_Store
+# Datos personales: nunca al repositorio
+mfh-import.json
+mfh-backup-*.json
+hevy-dump/
+tests/e2e/shots/
