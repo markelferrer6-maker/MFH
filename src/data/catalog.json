@@ -1,0 +1,315 @@
+[
+  {
+    "id": "press-declinado-maquina",
+    "name": "Press de Pecho Declinado (Máquina)",
+    "muscle": "Pecho",
+    "type": "weight_reps",
+    "image": "Leverage_Decline_Chest_Press"
+  },
+  {
+    "id": "cruce-poleas",
+    "name": "Cruce de Poleas",
+    "muscle": "Pecho",
+    "type": "weight_reps",
+    "image": "Cable_Crossover"
+  },
+  {
+    "id": "cruce-poleas-bajo",
+    "name": "Cruce de Poleas desde Abajo",
+    "muscle": "Pecho",
+    "type": "weight_reps",
+    "image": "Low_Cable_Crossover"
+  },
+  {
+    "id": "press-banca-multipower",
+    "name": "Press de Banca (Multipower)",
+    "muscle": "Pecho",
+    "type": "weight_reps",
+    "image": "Smith_Machine_Bench_Press"
+  },
+  {
+    "id": "press-inclinado-multipower",
+    "name": "Press de Banca Inclinado (Multipower)",
+    "muscle": "Pecho",
+    "type": "weight_reps",
+    "image": "Smith_Machine_Incline_Bench_Press"
+  },
+  {
+    "id": "fondos-paralelas",
+    "name": "Fondos en Paralelas",
+    "muscle": "Tríceps",
+    "type": "reps",
+    "image": "Dips_-_Triceps_Version"
+  },
+  {
+    "id": "remo-alto-iso",
+    "name": "Remo Alto Iso-Lateral (Máquina)",
+    "muscle": "Dorsales",
+    "type": "weight_reps",
+    "image": "Leverage_High_Row"
+  },
+  {
+    "id": "jalon-iso",
+    "name": "Jalón Frontal Iso-Lateral (Máquina de Discos)",
+    "muscle": "Dorsales",
+    "type": "weight_reps",
+    "image": "Wide-Grip_Lat_Pulldown",
+    "approx": true
+  },
+  {
+    "id": "jalon-cerrado",
+    "name": "Jalón al Pecho con Agarre Cerrado",
+    "muscle": "Dorsales",
+    "type": "weight_reps",
+    "image": "Close-Grip_Front_Lat_Pulldown"
+  },
+  {
+    "id": "jalon-v",
+    "name": "Jalón al Pecho con Agarre en V",
+    "muscle": "Dorsales",
+    "type": "weight_reps",
+    "image": "V-Bar_Pulldown"
+  },
+  {
+    "id": "jalon-brazos-rectos",
+    "name": "Jalón con Brazos Rectos (Polea)",
+    "muscle": "Dorsales",
+    "type": "weight_reps",
+    "image": "Straight-Arm_Pulldown"
+  },
+  {
+    "id": "dominada-asistida",
+    "name": "Dominada Asistida (Máquina)",
+    "muscle": "Dorsales",
+    "type": "weight_reps",
+    "image": "Band_Assisted_Pull-Up",
+    "approx": true
+  },
+  {
+    "id": "hiperextensiones",
+    "name": "Hiperextensiones (Banco Romano)",
+    "muscle": "Lumbares",
+    "type": "reps",
+    "image": "Hyperextensions_Back_Extensions"
+  },
+  {
+    "id": "encogimiento-maquina",
+    "name": "Encogimiento de Hombros (Máquina)",
+    "muscle": "Trapecios",
+    "type": "weight_reps",
+    "image": "Leverage_Shrug"
+  },
+  {
+    "id": "face-pull",
+    "name": "Face Pull (Polea)",
+    "muscle": "Hombros",
+    "type": "weight_reps",
+    "image": "Face_Pull"
+  },
+  {
+    "id": "pajaros-maquina",
+    "name": "Pájaros en Máquina (Deltoides Posterior)",
+    "muscle": "Hombros",
+    "type": "weight_reps",
+    "image": "Reverse_Machine_Flyes"
+  },
+  {
+    "id": "elevacion-lateral-polea",
+    "name": "Elevación Lateral (Polea)",
+    "muscle": "Hombros",
+    "type": "weight_reps",
+    "image": "Standing_Low-Pulley_Deltoid_Raise"
+  },
+  {
+    "id": "press-hombros-multipower",
+    "name": "Press de Hombros (Multipower)",
+    "muscle": "Hombros",
+    "type": "weight_reps",
+    "image": "Smith_Machine_Overhead_Shoulder_Press"
+  },
+  {
+    "id": "press-militar",
+    "name": "Press Militar (Barra)",
+    "muscle": "Hombros",
+    "type": "weight_reps",
+    "image": "Standing_Military_Press"
+  },
+  {
+    "id": "curl-maquina",
+    "name": "Curl de Bíceps (Máquina)",
+    "muscle": "Bíceps",
+    "type": "weight_reps",
+    "image": "Machine_Bicep_Curl"
+  },
+  {
+    "id": "curl-predicador-maquina",
+    "name": "Curl Predicador (Máquina)",
+    "muscle": "Bíceps",
+    "type": "weight_reps",
+    "image": "Machine_Preacher_Curls"
+  },
+  {
+    "id": "curl-polea",
+    "name": "Curl de Bíceps (Polea)",
+    "muscle": "Bíceps",
+    "type": "weight_reps",
+    "image": "Standing_Biceps_Cable_Curl"
+  },
+  {
+    "id": "curl-martillo-polea",
+    "name": "Curl Martillo con Cuerda (Polea)",
+    "muscle": "Bíceps",
+    "type": "weight_reps",
+    "image": "Cable_Hammer_Curls_-_Rope_Attachment"
+  },
+  {
+    "id": "extension-triceps-maquina",
+    "name": "Extensión de Tríceps (Máquina)",
+    "muscle": "Tríceps",
+    "type": "weight_reps",
+    "image": "Machine_Triceps_Extension"
+  },
+  {
+    "id": "triceps-sobre-cabeza-polea",
+    "name": "Extensión de Tríceps sobre la Cabeza (Polea)",
+    "muscle": "Tríceps",
+    "type": "weight_reps",
+    "image": "Cable_Rope_Overhead_Triceps_Extension"
+  },
+  {
+    "id": "sentadilla-hack",
+    "name": "Sentadilla Hack (Máquina)",
+    "muscle": "Cuádriceps",
+    "type": "weight_reps",
+    "image": "Hack_Squat"
+  },
+  {
+    "id": "sentadilla-multipower",
+    "name": "Sentadilla (Multipower)",
+    "muscle": "Cuádriceps",
+    "type": "weight_reps",
+    "image": "Smith_Machine_Squat"
+  },
+  {
+    "id": "sentadilla-barra",
+    "name": "Sentadilla (Barra)",
+    "muscle": "Cuádriceps",
+    "type": "weight_reps",
+    "image": "Barbell_Squat"
+  },
+  {
+    "id": "sentadilla-frontal",
+    "name": "Sentadilla Frontal (Barra)",
+    "muscle": "Cuádriceps",
+    "type": "weight_reps",
+    "image": "Front_Barbell_Squat"
+  },
+  {
+    "id": "peso-muerto-rumano-barra",
+    "name": "Peso Muerto Rumano (Barra)",
+    "muscle": "Isquios",
+    "type": "weight_reps",
+    "image": "Romanian_Deadlift"
+  },
+  {
+    "id": "aduccion-cadera",
+    "name": "Aducción de Cadera (Máquina)",
+    "muscle": "Aductores",
+    "type": "weight_reps",
+    "image": "Thigh_Adductor"
+  },
+  {
+    "id": "patada-gluteo-polea",
+    "name": "Patada de Glúteo (Polea)",
+    "muscle": "Glúteos",
+    "type": "weight_reps",
+    "image": "One-Legged_Cable_Kickback"
+  },
+  {
+    "id": "patada-gluteo-maquina",
+    "name": "Patada de Glúteo (Máquina)",
+    "muscle": "Glúteos",
+    "type": "weight_reps",
+    "image": "Glute_Kickback",
+    "approx": true
+  },
+  {
+    "id": "hip-thrust-maquina",
+    "name": "Hip Thrust (Máquina)",
+    "muscle": "Glúteos",
+    "type": "weight_reps",
+    "image": "Barbell_Hip_Thrust",
+    "approx": true
+  },
+  {
+    "id": "gemelos-de-pie",
+    "name": "Elevación de Gemelos de Pie (Máquina)",
+    "muscle": "Gemelos",
+    "type": "weight_reps",
+    "image": "Standing_Calf_Raises"
+  },
+  {
+    "id": "gemelos-prensa",
+    "name": "Gemelos en Prensa",
+    "muscle": "Gemelos",
+    "type": "weight_reps",
+    "image": "Calf_Press_On_The_Leg_Press_Machine"
+  },
+  {
+    "id": "crunch-maquina",
+    "name": "Crunch Abdominal (Máquina)",
+    "muscle": "Abdominales",
+    "type": "weight_reps",
+    "image": "Ab_Crunch_Machine"
+  },
+  {
+    "id": "crunch-polea",
+    "name": "Crunch en Polea",
+    "muscle": "Abdominales",
+    "type": "weight_reps",
+    "image": "Cable_Crunch"
+  },
+  {
+    "id": "rotacion-torso",
+    "name": "Rotación de Torso (Máquina)",
+    "muscle": "Abdominales",
+    "type": "weight_reps",
+    "image": "Torso_Rotation",
+    "approx": true
+  },
+  {
+    "id": "elevacion-piernas-paralelas",
+    "name": "Elevación de Piernas en Paralelas",
+    "muscle": "Abdominales",
+    "type": "reps",
+    "image": "Knee_Hip_Raise_On_Parallel_Bars"
+  },
+  {
+    "id": "eliptica",
+    "name": "Elíptica",
+    "muscle": "Cardio",
+    "type": "distance_duration",
+    "image": "Elliptical_Trainer"
+  },
+  {
+    "id": "bicicleta-estatica",
+    "name": "Bicicleta Estática",
+    "muscle": "Cardio",
+    "type": "distance_duration",
+    "image": "Bicycling_Stationary"
+  },
+  {
+    "id": "remo-cardio",
+    "name": "Remo (Máquina de Cardio)",
+    "muscle": "Cardio",
+    "type": "distance_duration",
+    "image": "Rowing_Stationary"
+  },
+  {
+    "id": "escaladora",
+    "name": "Escaladora",
+    "muscle": "Cardio",
+    "type": "duration",
+    "image": "Stairmaster"
+  }
+]

@@ -40,7 +40,11 @@ export function ExerciseImagesCompact({ exercise }: { exercise: Exercise }) {
 }
 
 /** Miniatura decorativa para listas (la fila entera ya es un botón). */
-export function ExerciseThumbImage({ exercise }: { exercise: Exercise | undefined }) {
+export function ExerciseThumbImage({
+  exercise,
+}: {
+  exercise: Pick<Exercise, 'hevyTemplateId' | 'catalogId'> | undefined;
+}) {
   const images = imagesFor(exercise);
   if (!images) return <span className="ex-thumb empty" aria-hidden="true" />;
   return <img className="ex-thumb" src={images.start} width={60} height={40} loading="lazy" alt="" />;

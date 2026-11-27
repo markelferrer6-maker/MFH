@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useMemo, useState } from 'react';
 import { db } from '../db/db';
-import { uid, type Exercise } from '../db/schema';
+import type { Exercise } from '../db/schema';
 import {
   RECORD_LABELS,
   RECORD_UNITS,
@@ -19,7 +19,7 @@ import { goBack, navigate } from '../lib/router';
 import { BarChart, LineChart } from '../ui/charts';
 import { Sheet, actionSheet, confirmDialog } from '../ui/dialogs';
 import { ExerciseImagesCompact, ExerciseThumbImage } from '../ui/ExerciseHelp';
-import { ExerciseForm, fold } from '../ui/ExercisePicker';
+import { ExerciseForm, ExercisePicker, fold } from '../ui/ExercisePicker';
 import { Icon } from '../ui/Icon';
 import { Page } from '../ui/layout';
 
@@ -125,19 +125,20 @@ export function Progress() {
         {shown.length === 0 && <div className="empty">Ningún ejercicio coincide.</div>}
       </div>
       <button className="btn block" onClick={() => setCreating(true)}>
-        <Icon name="plus" size={18} /> Nuevo ejercicio
+        <Icon name="plus" size={18} /> Añadir ejercicio o máquina
       </button>
 
       {creating && (
-        <Sheet title="Nuevo ejercicio" onClose={() => setCreating(false)}>
-          <ExerciseForm
-            submitLabel="Crear ejercicio"
-            onSubmit={async (data) => {
-              await db.exercises.add({ id: uid(), ...data, custom: true });
-              setCreating(false);
-            }}
-          />
-        </Sheet>
+        <ExercisePicker
+          exercises={exercises}
+          usage={new Map(rows.map((r) => [r.exercise.id, r.count]))}
+          title="Añadir ejercicio o máquina"
+          onPick={(id) => {
+            setCreating(false);
+            navigate(`/exercise/${id}`);
+          }}
+          onClose={() => setCreating(false)}
+        />
       )}
     </Page>
   );

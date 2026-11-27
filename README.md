@@ -6,6 +6,7 @@ App de entrenamiento personal: rutinas, registro de series y progreso. Es una we
 
 - **Rutinas** con series planificadas, descansos por ejercicio, notas y superseries.
 - **Entreno en curso**: cada serie muestra lo que hiciste la última vez y viene sugerida con esos valores; un toque la marca como hecha y arranca el descanso.
+- **Catálogo de máquinas** de gimnasio para añadir ejercicios con un toque.
 - **Fotos de cada ejercicio** (posición inicial y final) al tocar su miniatura.
 - **Historial** editable de todos los entrenos.
 - **Progreso** por ejercicio: peso máximo, 1RM estimado (fórmula de Epley), volumen y récords personales.
@@ -75,6 +76,10 @@ python3 scripts/fetch-exercise-images.py
 ```
 
 Los ejercicios creados a mano en la app no tienen foto.
+
+### Catálogo de máquinas
+
+`src/data/catalog.json` es una lista de máquinas y ejercicios habituales de gimnasio (poleas, multipower, máquinas de discos, cardio) con nombre, grupo muscular, tipo y foto. Aparecen al añadir un ejercicio, debajo de los que ya tienes, y pasan a tu biblioteca la primera vez que eliges uno. Para ampliar el catálogo, añade una entrada con un `id` nuevo; si lleva `image`, vuelve a ejecutar el script de las fotos.
 
 ### Importar desde Hevy
 

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { db } from '../db/db';
 import { MUSCLES, TYPE_LABELS, uid, type Exercise, type ExerciseType } from '../db/schema';
+import { catalogNotInLibrary, exerciseFromCatalog, type CatalogEntry } from '../lib/catalog';
 import { Sheet } from './dialogs';
 import { ExerciseThumbImage } from './ExerciseHelp';
 import { Icon } from './Icon';
@@ -80,13 +81,27 @@ export function ExercisePicker({
   const [muscle, setMuscle] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
-  const muscles = useMemo(() => [...new Set(exercises.map((e) => e.muscle))].sort((a, b) => a.localeCompare(b, 'es')), [exercises]);
+  const catalog = useMemo(() => catalogNotInLibrary(exercises), [exercises]);
+  const muscles = useMemo(
+    () => [...new Set([...exercises, ...catalog].map((e) => e.muscle))].sort((a, b) => a.localeCompare(b, 'es')),
+    [exercises, catalog],
+  );
   const shown = useMemo(() => {
     const q = fold(query.trim());
     return exercises
       .filter((e) => (!muscle || e.muscle === muscle) && (!q || fold(e.name).includes(q)))
       .sort((a, b) => (usage.get(b.id) ?? 0) - (usage.get(a.id) ?? 0) || a.name.localeCompare(b.name, 'es'));
   }, [exercises, usage, query, muscle]);
+  const shownCatalog = useMemo(() => {
+    const q = fold(query.trim());
+    return catalog.filter((c) => (!muscle || c.muscle === muscle) && (!q || fold(c.name).includes(q)));
+  }, [catalog, query, muscle]);
+
+  const pickFromCatalog = async (entry: CatalogEntry) => {
+    const id = uid();
+    await db.exercises.add(exerciseFromCatalog(entry, id));
+    onPick(id);
+  };
 
   if (creating) {
     return (
@@ -126,20 +141,41 @@ export function ExercisePicker({
           </button>
         ))}
       </div>
-      <div className="list">
-        {shown.map((e) => (
-          <button key={e.id} className="list-item" onClick={() => onPick(e.id)}>
-            <ExerciseThumbImage exercise={e} />
-            <span className="grow">
-              <span className="title ellipsis" style={{ display: 'block' }}>
-                {e.name}
+      {shown.length > 0 && shownCatalog.length > 0 && <h3 className="section-title">Tus ejercicios</h3>}
+      {(shown.length > 0 || shownCatalog.length === 0) && (
+        <div className="list">
+          {shown.map((e) => (
+            <button key={e.id} className="list-item" onClick={() => onPick(e.id)}>
+              <ExerciseThumbImage exercise={e} />
+              <span className="grow">
+                <span className="title ellipsis" style={{ display: 'block' }}>
+                  {e.name}
+                </span>
+                <span className="small muted">{e.muscle}</span>
               </span>
-              <span className="small muted">{e.muscle}</span>
-            </span>
-          </button>
-        ))}
-        {shown.length === 0 && <div className="empty">Ningún ejercicio coincide.</div>}
-      </div>
+            </button>
+          ))}
+          {shown.length === 0 && shownCatalog.length === 0 && <div className="empty">Ningún ejercicio coincide.</div>}
+        </div>
+      )}
+      {shownCatalog.length > 0 && (
+        <>
+          <h3 className="section-title">Catálogo de máquinas</h3>
+          <div className="list">
+            {shownCatalog.map((c) => (
+              <button key={c.id} className="list-item" onClick={() => pickFromCatalog(c)}>
+                <ExerciseThumbImage exercise={{ catalogId: c.id }} />
+                <span className="grow">
+                  <span className="title ellipsis" style={{ display: 'block' }}>
+                    {c.name}
+                  </span>
+                  <span className="small muted">{c.muscle}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
       <button className="btn block" onClick={() => setCreating(true)}>
         <Icon name="plus" size={18} /> Crear ejercicio nuevo
       </button>

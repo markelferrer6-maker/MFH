@@ -63,6 +63,8 @@ export interface Exercise {
   type: ExerciseType;
   /** Id de la plantilla de Hevy de la que se importó, si viene de allí. */
   hevyTemplateId?: string;
+  /** Id en el catálogo de máquinas de la app (src/data/catalog.json), si se añadió desde allí. */
+  catalogId?: string;
   custom?: boolean;
 }
 

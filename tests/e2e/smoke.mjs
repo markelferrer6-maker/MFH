@@ -201,6 +201,14 @@ try {
   await first.getByRole('button', { name: 'Añadir serie' }).click();
   await shot(page, 'entreno-series');
 
+  // Añadir una máquina del catálogo que no estaba en la biblioteca.
+  await page.getByRole('button', { name: 'Añadir ejercicio' }).click();
+  await page.getByPlaceholder('Buscar ejercicio').fill('hack');
+  await page.getByRole('dialog').getByRole('button', { name: /Sentadilla Hack/ }).click();
+  await page.locator('section.ex-card', { hasText: 'Sentadilla Hack (Máquina)' }).waitFor();
+  assert((await exCards.count()) === routine.exercises.length + 1, 'se puede añadir una máquina del catálogo al entreno');
+  await shot(page, 'catalogo');
+
   // Recargar a mitad del entreno: no se pierde nada.
   await page.reload();
   await page.getByRole('button', { name: 'Terminar', exact: true }).waitFor();

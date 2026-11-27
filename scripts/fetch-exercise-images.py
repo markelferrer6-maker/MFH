@@ -4,8 +4,9 @@ Descarga y reduce las fotos de ejercicios que usa la app.
 
   python3 scripts/fetch-exercise-images.py
 
-Lee src/data/exerciseImages.json (plantilla de Hevy -> id en free-exercise-db) y deja
-en public/ex/<id>/0.webp y 1.webp la posición inicial y la final de cada ejercicio.
+Lee src/data/exerciseImages.json (plantilla de Hevy -> id en free-exercise-db) y
+src/data/catalog.json (catálogo de máquinas; campo "image"), y deja en
+public/ex/<id>/0.webp y 1.webp la posición inicial y la final de cada ejercicio.
 
 Las fotos vienen de https://github.com/yuhonas/free-exercise-db, publicado en el
 dominio público (Unlicense). Requiere Pillow con soporte WebP.
@@ -23,7 +24,8 @@ WIDTH = 480
 QUALITY = 68
 
 mapping = json.loads((ROOT / "src/data/exerciseImages.json").read_text("utf8"))
-ids = sorted({entry["id"] for entry in mapping.values()})
+catalog = json.loads((ROOT / "src/data/catalog.json").read_text("utf8"))
+ids = sorted({entry["id"] for entry in mapping.values()} | {entry["image"] for entry in catalog if entry.get("image")})
 total = 0
 for ex_id in ids:
     folder = ROOT / "public/ex" / ex_id

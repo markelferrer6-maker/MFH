@@ -145,6 +145,7 @@ function parseExercise(v: unknown, i: number): Exercise {
     muscle: optStr(v.muscle) ?? 'Otro',
     type: v.type as ExerciseType,
     hevyTemplateId: optStr(v.hevyTemplateId),
+    catalogId: optStr(v.catalogId),
     custom: v.custom === true ? true : undefined,
   });
 }
